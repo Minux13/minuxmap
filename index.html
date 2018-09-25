@@ -5,6 +5,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Highmaps Examples</title>
  
+    <link rel="stylesheet" href="countries.css" type="text/css">
+    
     <script src="svg-pan-zoom.js"></script>
     <!--<script src="zoom.js"></script>-->
 
@@ -12,28 +14,25 @@
 <style>
 
 #container{
-    background: #ccf;
-    width: 90%;
-    height: auto;
+    background: #c7d7f7;
+    width: 80%;
     /*overflow: auto;*/
+    margin: auto;
 }
 ::-webkit-scrollbar { 
     display: none; 
 }
 
 path{
-   fill: #aaf;	
-    stroke: rgb(255, 255, 255); 
-    stroke-width: 8; 
+   fill: #a0b0e0;	
+    stroke: #c0d2f0; 
+    stroke-width: 6; 
     fill-opacity: 1;
 }
 path:hover{
     fill: #f0f;	
     stroke-width: 12; 
     stroke: rgb(255, 255, 255); 
-}
-.scaled {
-  transform: scale(1.7); /* Igual que: scaleX(0.7) scaleY(0.7) */
 }
 #mx-tooltip {
     display: none;
@@ -42,7 +41,7 @@ path:hover{
     position: absolute;
     z-index: 1000;
 }
-svg:hover~#mx-tooltip{
+svg:hover + #mx-tooltip{
     display: block;
 }
 #outlines{
@@ -50,29 +49,23 @@ svg:hover~#mx-tooltip{
     /*transition: transform-origin 2s;*/
 }
 #map{
-    width: 100%;
+    width: 100% !important;
     height: auto;
 }
 </style>
 <script src="countries.js"></script>
 <script>
 var mxCountries = [];
-
-for(var c=0; c<mx_countries_codes.length; c++){
-    var country = mx_countries_codes[c];
-    var countryCode = country.cca2;
-
-    mxCountries[countryCode.toLowerCase()] = country;
-}
-
 </script>
 
 	</head>
 	<body>
-		<h1 id="title">Minux map</h1>
-<div id="container">		
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-</div>
+
+        <div id="ask"></div>
+        <div id="iscorrect" ></div>
+        
+	<div id="container">		
+        </div>
 
 
 
@@ -81,20 +74,119 @@ for(var c=0; c<mx_countries_codes.length; c++){
 <script>
 
 
-// Expose to window namespase for testing purposes
-var zoom = svgPanZoom('#map', {
-  zoomEnabled: true,
-  controlIconsEnabled: true,
-  fit: true,
-  center: true,
-  // viewportSelector: document.getElementById('demo-tiger').querySelector('#g4') // this option will make library to misbehave. Viewport should have no transform attribute
-});
 
+
+var minuxMap = {
+
+    init : function(){
+	this.setSvgPanZoom();
+
+	for(var c=0; c<minux_countries_codes.length; c++){
+            var country = minux_countries_codes[c];
+            var countryCode = country.cca2;
+            minuxMap.allCountriesCodes[countryCode.toLowerCase()] = country;        
+	}
+
+	for(var c=0; c< this.countriesByClassName.length; c++){
+	    this.countriesIdsArray.push( this.countriesByClassName[c].id )
+	    //this.countriesByClassName[c].addEventListener("mousemove", hoverArea);
+            this.countriesByClassName[c].addEventListener("touchend", this.clickEvent);
+	}
+	this.setRandomCountryId();
+    },
+    setSvgPanZoom : function(){
+	// Expose to window namespase for testing purposes
+        var zoom = svgPanZoom('#map', {
+             zoomEnabled: true,
+             controlIconsEnabled: true,
+             fit: true,
+             center: true,
+             // viewportSelector: document.getElementById('demo-tiger').querySelector('#g4')
+	     // this option will make library to misbehave. Viewport should have no transform attribute
+        });
+    },
+    allCountriesCodes : [],
+    clickEvent : function(e){
+        var countryTargetClick = e.target;
+	if( minuxMap.idCountryGuess == countryTargetClick.id ){
+	    countryTargetClick.style.fill='yellow';
+	    //areaClick.mouseEnabled = false;
+	    minuxMap.correctsAnswerNum++;
+            //areaClick.baseSettings.selectedColor = areaClick.color;
+	    minuxMap.correct();
+	}else{
+            minuxMap.inCorrect();
+	    /*var area = map.getObjectById(game.countryCodeAsk);
+	    countryTargetClick.style.fill='yellow';
+	    area.colorReal = area.color;
+            area.baseSettings.selectedColor = area.color;
+	    //area.mouseEnabled = false;
+            event.chart.selectObject();//Deselecciona pero reajusta el zoom del mapa
+            //areaClick.baseSettings.selectedColor = colorsGame.areaHover;
+	    //areaClick.validate();
+	    map.zoomToGroup( [ area ] );
+	    area.validate();
+	    game.inCorrect();*/
+	}
+    },
+
+    idCountryGuess : "",
+    countriesByClassName : document.getElementsByClassName("europe"),
+    countriesIdsArray : [],
+    setQuestion: function(){
+        var countryName = minuxMap.allCountriesCodes[ minuxMap.idCountryGuess ].translations.spa.common;
+	console.log(countryName);
+        document.getElementById('ask').innerHTML = '¿Dónde se encuentra '+ countryName +'?';
+    },
+    setRandomCountryId : function(){
+        var numCountries = minuxMap.countriesIdsArray.length;
+    	if( numCountries >= 0 ){
+    	    var randomIdNum = Math.floor(Math.random() * numCountries); 
+    	    this.idCountryGuess = this.countriesIdsArray[randomIdNum];
+            this.countriesIdsArray.splice(randomIdNum, 1);
+    	    this.setQuestion();
+    	}else{
+    	    /*document.getElementById('ask').innerHTML = "Correctos " + game.numberCorrects +" de "+ game.numberAreas +" paises";
+    	    map.clickMapObject = function(){;}
+    	    map.balloon.enabled = true;*/
+    	}	    
+    },
+    timer: "",
+    setTimer: function(){
+	clearTimeout(this.timer);
+        this.timer = setTimeout(function(){
+            document.getElementById("iscorrect").className = "hidealert";
+            //map.goHome();
+        }, 1500);   
+    },
+    correct: function(){
+	var checkElement = document.getElementById("iscorrect");
+	checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'>  &#x2713; Correcto </span>";
+        checkElement.style.background = "#3630d4";
+	checkElement.className = "showalert";
+	this.setRandomCountryId();
+	this.setTimer();
+    },
+    inCorrect: function(){
+        var checkElement = document.getElementById("iscorrect");
+	checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'> &#x2717 Incorrecto </span>";
+        checkElement.style.background = "#d66";
+	checkElement.className = "showalert";
+	this.setRandomCountryId();
+	this.setTimer();
+    },
+    correctsAnswerNum : 0,
+}
+minuxMap.init();
+
+
+
+/*
 var countries=document.getElementsByClassName("europe");
 function hoverArea(e){
     var tooltip = document.getElementById('mx-tooltip');
     var codeCountry = e.toElement.id;
-    console.log(codeCountry);
+    //console.log(codeCountry);
     tooltip.innerHTML = mxCountries[ codeCountry ].translations.spa.common;
 
     var x = e.pageX - ( tooltip.offsetWidth/2 ); // e.pageX clientX 
@@ -104,8 +196,13 @@ function hoverArea(e){
     tooltip.style.left = x +'px'; 
 }
 for(c = 0; c< countries.length; c++){
-    countries[c].addEventListener("mousemove", hoverArea);
+    //countries[c].addEventListener("mousemove", hoverArea);
+    //countries[c].addEventListener("click", function(e){console.log(e.target.id)});
 }
+*/
+var mapHeight = document.getElementById('outlines').getBoundingClientRect().height;
+document.getElementById('map').setAttribute("height", mapHeight+"px");
+
 
 
 

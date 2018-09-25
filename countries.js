@@ -1,4 +1,4 @@
-var mx_countries_codes = [
+var minux_countries_codes = [
 	{
 		"name": {
 			"common": "Aruba",
