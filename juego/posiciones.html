@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>Highmaps Examples</title>
+ 
+		<link rel="stylesheet" href="countries.css" type="text/css">
+    
+<style>
+
+#container{
+    width: 80%;
+    /*overflow: auto;*/
+    margin: auto;
+    position: relative;
+}
+#map{
+    background: #a9b9f0; /*#dfe9fc;*/
+    height: calc(100vh - 200px);
+}
+::-webkit-scrollbar { 
+    display: none; 
+}
+@media only screen and (max-width: 600px) {
+    #container {
+        width: 100%;
+    }
+}
+body{
+    padding: 0 !important;
+    background: linear-gradient(160deg,#0b0c22,#004400);
+    min-height: 100vh;
+}
+
+path{
+    fill: green; /*#a0b0e0;*/
+    stroke: #c0d2f0; 
+    stroke-width: 6; 
+    fill-opacity: 1;
+}
+path:hover{
+    fill: #f0f;	
+    stroke-width: 12; 
+    stroke: rgb(255, 255, 255); 
+}
+#mx-tooltip {
+    display: none;
+    background: #C8C8f8;
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+}
+
+#outlines{
+    transition: transform-origin 1.5s, transform 1.5s;
+}
+
+</style>
+<script src="countries.js"></script>
+<script>
+var mxCountries = [];
+</script>
+
+	</head>
+	<body>
+
+        <div id="ask">aa</div>
+        <div id="iscorrect" ></div>
+        
+	<div id="container" ></div>
+
+<script src="svgEuropa.js"></script>
+
+<script>
+
+
+/*var countriesByClassName = document.getElementsByClassName("europe");
+for(var c=0; c< countriesByClassName.length; c++){
+    countriesByClassName[c].addEventListener();
+}*/
+
+
+function stringToFloat(coordenates){
+    path=[];
+    for(let i=0; i<coordenates.length; i++){
+        let point = coordenates[i];
+        let coordenateObject = {p: point[0], x: [], y: []}
+        for(let j=1; j<point.length -1; j++){
+            coordenateObject.x.push(parseFloat(point[j][0]));
+            coordenateObject.y.push(parseFloat(point[j][1]));
+        }
+        path.push(coordenateObject);
+    }
+    return path;
+}
+
+function restaPosicion(arrayPoints){
+    
+    var coordenates = []
+    for(let i=0; i<arrayPoints.length; i++){    
+        let oneCoordenate = arrayPoints[i].split(" ");
+        let oneCoordenateArray = [];
+        for(let j=0; j<oneCoordenate.length; j++){
+            oneCoordenateArray.push( oneCoordenate[j].split(",") );
+        }
+        coordenates.push(oneCoordenateArray);
+    }
+    return stringToFloat(coordenates);
+}
+
+function getArrayPositions(pais){
+    var d = document.getElementById("de").getAttribute("d")
+    var points = [];
+    
+    var point = "";
+    for(let i=0; i<d.length; i++){
+        
+        if( d[i] == 'M' || d[i] == 'C' || d[i] == 'L' || d[i] == 'H' || d[i] == 'V' || d[i] == 'S' || d[i] == 'Q' || d[i] == 'T' || d[i] == 'A' || d[i] == 'Z'
+        || d[i] == 'm' || d[i] == 'c' || d[i] == 'l' || d[i] == 'h' || d[i] == 'v' || d[i] == 's' || d[i] == 'q' || d[i] == 't' || d[i] == 'a' || d[i] == 'z' ){
+            points.push(point)
+            point = "";            
+       }
+
+       point += d[i];
+
+    }
+    return restaPosicion(points)
+}
+//var pathO = getArrayPositions("de");
+
+function moveVertical(px){
+    var str = "";
+    for(let i=1; i<pathO.length; i++){
+        str += pathO[i].p;
+        str += " ";
+        for(let j=0; j<pathO[i].x.length; j++){
+            let y = pathO[i].y[j] + px;
+            str += pathO[i].x[j] + "," + y + " "
+        }
+    }
+    document.getElementById("de").setAttribute("d", str)
+}
+
+document.getElementsByClassName("eu")
+
+
+</script>
+
+	</body>
+</html>
