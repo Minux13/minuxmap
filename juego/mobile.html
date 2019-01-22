@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="svg-pan-zoom.js"></script>
+    <script src="hammer.js"></script>
+  </head>
+
+  <body>
+    <div id="mobile-div" style="width: 50%; height: 200px; border:1px solid black; ">
+      <svg id="mobile-svg" xmlns="http://www.w3.org/2000/svg" style="display: inline; width: 100%; min-width: inherit; max-width: inherit; height: inherit; min-height: inherit; max-height: inherit;" version="1.1">
+        <defs>
+          <linearGradient id="linear-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:rgb(56,121,217);stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(138,192,7);stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <g fill="none">
+          <g stroke="#000" fill="#FFF">
+            <rect x="5" y="5" width="240" height="240" fill="url(#linear-gradient)"/>
+            <path d="M 5 5  L 245 245 Z"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <button onclick="redimensiona.start();">Restart</button>
+
+    <script>
+      // Don't use window.onLoad like this in production, because it can only listen to one function.
+      //window.onload = function() {
+        var eventsHandler;
+
+        eventsHandler = {
+          haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel']
+        , init: function(options) {
+            var instance = options.instance
+              , initialScale = 1
+              , pannedX = 0
+              , pannedY = 0
+
+            // Init Hammer
+            // Listen only for pointer and touch events
+            this.hammer = Hammer(options.svgElement, {
+              inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+            })
+
+            // Enable pinch
+            this.hammer.get('pinch').set({enable: true})
+
+            // Handle double tap
+            this.hammer.on('doubletap', function(ev){
+              instance.zoomIn()
+            })
+
+            // Handle pan
+            this.hammer.on('panstart panmove', function(ev){
+              // On pan start reset panned variables
+              if (ev.type === 'panstart') {
+                pannedX = 0
+                pannedY = 0
+              }
+
+              // Pan only the difference
+              instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
+              pannedX = ev.deltaX
+              pannedY = ev.deltaY
+            })
+
+            // Handle pinch
+            this.hammer.on('pinchstart pinchmove', function(ev){
+              // On pinch start remember initial zoom
+              if (ev.type === 'pinchstart') {
+                initialScale = instance.getZoom()
+                instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+              }
+
+              instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+            })
+
+            // Prevent moving the page on some devices when panning over SVG
+            options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
+          }
+
+        , destroy: function(){
+            this.hammer.destroy()
+          }
+        }
+
+        // Expose to window namespace for testing purposes
+        window.panZoom = svgPanZoom('#mobile-svg', {
+          zoomEnabled: true
+        , controlIconsEnabled: false
+        , fit: 1
+        , center: 1
+        , customEventsHandler: eventsHandler
+        });
+     // };
+
+    panZoom.disableDblClickZoom();
+
+    var redimensiona = {
+        values : [],
+        frames : 30,
+        initX : panZoom.getPan().x,
+        initY : panZoom.getPan().y,
+        setValues : function()  { 
+            var p = panZoom.getPan();
+            var z = panZoom.getZoom();
+            var px = p.x;
+            var py = p.y;
+            var mov = redimensiona.frames;
+            var avancePanX = (px -redimensiona.initX )/mov;
+            var avancePanY = (py -redimensiona.initY )/mov;
+            var retroZoom = (1-z)/mov;
+            
+            var cant = [];
+
+            for(var im=0; im<mov; im++){
+                px = px-avancePanX;
+                py = py-avancePanY;
+                z = z + retroZoom;
+                cant.push({x:px, y:py, z:z})
+            }
+    
+            redimensiona.values = cant;
+        } ,
+        interval : 0,
+        numInterval : 0,  
+        start : function(){ 
+            redimensiona.setValues();
+            redimensiona.interval = setInterval(function(){
+                //console.log(redimensiona.values[numInterval].z);
+                var r = redimensiona.values;
+                panZoom.zoom(r[redimensiona.numInterval].z);
+                panZoom.pan({ x: (r[redimensiona.numInterval].x), y: (r[redimensiona.numInterval].y)});
+                redimensiona.numInterval++;
+                if(redimensiona.numInterval >= (redimensiona.frames)){
+                    clearInterval(redimensiona.interval)
+                    redimensiona.numInterval = 0;
+                    panZoom.reset();
+                }
+            }, 20);
+            
+        }
+    }
+
+    </script>
+
+  </body>
+
+</html>
