@@ -2,10 +2,9 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>Highmaps Examples</title>
+	<title>Adivina el país</title>
 
 	<link rel="stylesheet" href="countries.css" type="text/css">
 
@@ -55,7 +54,7 @@
         stroke: rgb(255, 255, 255); 
     }
     #mx-tooltip {
-        /*display: none;*/
+        display: none;
         background: #C8C8f8;
         padding: 10px;
         position: absolute;
@@ -280,7 +279,7 @@ for(var c=0; c< countriesByClassName.length; c++){
         let z = actualZoom + progresoZoom ;
         let divisorTiempos = (limiteZoom - z )/progresoZoom  //Math.abs((limiteZoom - z )/progresoZoom);
         let paisCenterX = 4250;
-        let paisCenterY = 7000;
+        let paisCenterY = 5200;
         let x = paisCenterX*panZoom.getSizes().realZoom;
         let y = paisCenterY*panZoom.getSizes().realZoom;
         let realX = panZoom.getSizes().viewBox.width;
@@ -412,7 +411,28 @@ for(var c=0; c< countriesByClassName.length; c++){
     }
 
 
+    function paisesChicos(x,y, id){
+        var radio = 100;
+        var diam = radio*2;
+        var mx = x - radio;
+        var my = y - radio/2;
+        var dosT = (diam)*(0.666);
+        var c1x = [ mx, mx+diam, mx+diam];
+        var c1y = [ my+dosT, my+dosT, my];
+        var c2x = [ mx+diam, mx, mx];
+        var c2y = [ my-dosT, my-dosT, my];
+        d = 'M ' + mx + ',' + my + ' C ';
+        d+= c1x[0] + ',' + c1y[0] + ' ';
+        d+= c1x[1] + ',' + c1y[1] + ' ';
+        d+= c1x[2] + ',' + c1y[2] + ' C ';
+        d+= c2x[0] + ',' + c2y[0] + ' ';
+        d+= c2x[1] + ',' + c2y[1] + ' ';
+        d+= c2x[2] + ',' + c2y[2] + ' ';
+        d+= 'z ';
+        document.getElementById(id).setAttribute('d', d)
+        return d;
 
+    }
 
 aaa = [];
     function zoomEnp(idE){

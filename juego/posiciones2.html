@@ -3,8 +3,9 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<title>Adivina el país</title>
+		<title>Highmaps Examples</title>
  
 		<link rel="stylesheet" href="countries.css" type="text/css">
     
@@ -56,9 +57,7 @@ path:hover{
 #outlines{
     transition: transform-origin 1.5s, transform 1.5s;
 }
-#ru{
-    fill: rgba(0,0,0,0.3) !important;
-}
+
 </style>
 <script src="countries.js"></script>
 <script>
@@ -115,7 +114,7 @@ function restaPosicion(arrayPoints){
 }
 
 function getArrayPositions(pais){
-    var d = document.getElementById(pais).getAttribute("d")
+    var d = document.getElementById("de").getAttribute("d")
     var points = [];
     
     var point = "";
@@ -132,10 +131,9 @@ function getArrayPositions(pais){
     }
     return restaPosicion(points)
 }
-//var pathO = getArrayPositions("de");
+var pathO = getArrayPositions("de");
 
-function moveVertical(px, pais){
-    var pathO = getArrayPositions(pais);
+function moveVertical(px){
     var str = "";
     for(let i=1; i<pathO.length; i++){
         str += pathO[i].p;
@@ -145,7 +143,7 @@ function moveVertical(px, pais){
             str += pathO[i].x[j] + "," + y + " "
         }
     }
-    document.getElementById(pais).setAttribute("d", str)
+    document.getElementById("de").setAttribute("d", str)
 }
 
 document.getElementsByClassName("eu")
