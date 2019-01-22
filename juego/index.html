@@ -1,77 +1,108 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<title>Highmaps Examples</title>
- 
-		<link rel="stylesheet" href="countries.css" type="text/css">
+	<title>Highmaps Examples</title>
+
+	<link rel="stylesheet" href="countries.css" type="text/css">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+
+    <script src="svg-pan-zoom.js"></script>
+    <script src="hammer.js"></script>
+    <script src="countries.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <style>
     
-        <script src="svg-pan-zoom.js"></script>
-        <script src="hammer.js"></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-
-<style>
-
-#container{
-    width: 80%;
-    /*overflow: auto;*/
-    margin: auto;
-}
-#map{
-    background: #dfe9fc;
-    height: calc(100vh - 100px);
-}
-::-webkit-scrollbar { 
-    display: none; 
-}
-@media only screen and (max-width: 600px) {
-    #container {
-        width: 100%;
+    #container{
+        width: 80%;
+        /*overflow: auto;*/
+        margin: auto;
+        position: relative;
     }
-}
-body{
-    padding: 0 !important;
-}
+    #map{
+        background: #a9b9f0; /*#dfe9fc;*/
+        height: calc(100vh - 200px);
+    }
+    ::-webkit-scrollbar { 
+        display: none; 
+    }
+    @media only screen and (max-width: 600px) {
+        #container {
+            width: 100%;
+        }
+    }
+    body{
+        padding: 0 !important;
+        background: linear-gradient(160deg,#0b0c22,#004400);
+        min-height: 100vh;
+    }
+    
+    path, .europe{
+        fill: green; /*#a0b0e0;*/
+        stroke: #c0d2f0; 
+        stroke-width: 6; 
+        fill-opacity: 1;
+    }
+    path:hover, .europe:hover{
+        fill: #55a;	
+        stroke-width: 12; 
+        stroke: rgb(255, 255, 255); 
+    }
+    #mx-tooltip {
+        /*display: none;*/
+        background: #C8C8f8;
+        padding: 10px;
+        position: absolute;
+        z-index: 1000;
+    }
+    
+    #outlines{
+        transition: transform-origin 1.5s, transform 1.5s;
+    }
+    
+    #score{
+        /*position: absolute;*/
+        right: 0px;
+        top: 25px;
+        color: #d0b32a;/*#e0cd71; a28c20*/
+        min-width: 60px;
+        background: white;
+        border-top-left-radius:    20px;
+        border-bottom-left-radius: 20px;
+        padding: 7px 15px;
+        display: inline;
+    }
+    .iconScore{
+        color: #666;
+        /*font-size: 0.9em;*/
+        margin: 0 3px;
+    }
+    #ask{
+        margin: 10px 0 15px 0;
+    }
+    
+    </style>
+    
+</head>
+<body>
 
-path{
-   fill: #a0b0e0;	
-    stroke: #c0d2f0; 
-    stroke-width: 6; 
-    fill-opacity: 1;
-}
-path:hover{
-    fill: #f0f;	
-    stroke-width: 12; 
-    stroke: rgb(255, 255, 255); 
-}
-#mx-tooltip {
-    display: none;
-    background: #C8C8f8;
-    padding: 10px;
-    position: absolute;
-    z-index: 1000;
-}
+    <div style="position:relative; width: 100vw;display: block;text-align: right;margin-top: 25px;">
+        <div id="score" >
+            <i class="fas fa-star-half-alt" style="margin: 0 5px 0 2px;"></i>
+            <span class="iconScore"><i class="far fa-check-circle"></i></span> 0 
+            <span style="color:gray;font-size:0.9em;vertical-align: text-top;margin: 0 4px;">|</span>
+            <span class="iconScore"><i class="far fa-times-circle"></i></span> 0
+        </div>
+    </div>
+    <div id="ask">¿Dónde se esta?</div>
+    <div id="iscorrect" ></div>
 
-#outlines{
-    transition: transform-origin 1.5s, transform 1.5s;
-}
-
-body{background: white;}
-</style>
-<script src="countries.js"></script>
-<script>
-var mxCountries = [];
-</script>
-
-	</head>
-	<body>
-
-        <div id="ask">aa</div>
-        <div id="iscorrect" ></div>
-        
 	<div id="container" ></div>
     <button onclick="panZoom.pan({x:-4250*panZoom.getSizes().realZoom + (panZoom.getSizes().width/2),y:-7000*panZoom.getSizes().realZoom + (panZoom.getSizes().height/2)});">España</button>
     <button onclick="redimensiona.zoom = true;redimensiona.start();">Progresivo España</button>
@@ -82,14 +113,40 @@ var mxCountries = [];
 
 <script>
 var countriesByClassName = document.getElementsByClassName("europe");
+
+
+/*function hoverArea(e){
+    var tooltip = document.getElementById('mx-tooltip');
+    var codeCountry = e.toElement.id;
+    //console.log(codeCountry);
+    tooltip.innerHTML = codeCountry;  //minux_countries_codes[ codeCountry ].name.common;
+
+    var x = e.pageX - ( tooltip.offsetWidth/2 ) - 120; // e.pageX clientX 
+    var y = e.pageY - ( tooltip.offsetHeight ) - 80;  
+
+    tooltip.style.top = y + 'px';
+    tooltip.style.left = x +'px'; 
+} */
+
+
 for(var c=0; c< countriesByClassName.length; c++){
-    countriesByClassName[c].addEventListener("click", function(e){if(!clickDisabled){document.getElementById("ask").innerHTML = e.path[0].id; console.log(e.path[0].id);}else {
+    countriesByClassName[c].addEventListener("click", function(e){
+        if(!clickDisabled){
+            document.getElementById("ask").innerHTML = e.path[0].id; 
+            console.log(e.path[0].id);
+        }else {
             // enable click again
             clickDisabled = false;
         }});
+
+    //countriesByClassName[c].addEventListener("mousemove", hoverArea);
 }
 
-//setInterval(function())
+
+
+
+
+
      var clickDisabled = false;
 // Don't use window.onLoad like this in production, because it can only listen to one function.
       //window.onload = function() {
@@ -399,5 +456,5 @@ aaa = [];
 
 </script>
 
-	</body>
+</body>
 </html>
