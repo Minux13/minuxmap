@@ -23,9 +23,10 @@
         /*overflow: auto;*/
         margin: auto;
         position: relative;
+        background: linear-gradient(220deg,#559, #99c,#aab,#559)
     }
     #map{
-        background: #a9b9f0; /*#dfe9fc;*/
+        background: transparent;/*#a9b9f0; /*#dfe9fc;*/
         height: calc(100vh - 200px);
     }
     ::-webkit-scrollbar { 
@@ -38,7 +39,7 @@
     }
     body{
         padding: 0 !important;
-        background: linear-gradient(160deg,#0b0c22,#004400);
+        background: linear-gradient(160deg,#0b0c22,#004400); /*linear-gradient(160deg,#0b0c22,#004400);*/
         min-height: 100vh;
     }
     
@@ -54,7 +55,7 @@
         stroke: rgb(255, 255, 255); 
     }
     #mx-tooltip {
-        display: none;
+        /*display: none;*/
         background: #C8C8f8;
         padding: 10px;
         position: absolute;
@@ -113,8 +114,8 @@
 <script>
 var countriesByClassName = document.getElementsByClassName("europe");
 
-
-/*function hoverArea(e){
+/*
+function hoverArea(e){
     var tooltip = document.getElementById('mx-tooltip');
     var codeCountry = e.toElement.id;
     //console.log(codeCountry);
@@ -125,8 +126,8 @@ var countriesByClassName = document.getElementsByClassName("europe");
 
     tooltip.style.top = y + 'px';
     tooltip.style.left = x +'px'; 
-} */
-
+} 
+*/
 
 for(var c=0; c< countriesByClassName.length; c++){
     countriesByClassName[c].addEventListener("click", function(e){
@@ -249,7 +250,7 @@ for(var c=0; c< countriesByClassName.length; c++){
         interval : 0,
         numInterval : 0, 
         zoom: false, 
-        start : function(){ 
+        start : function(idPais){ 
             redimensiona.setValues();
             redimensiona.interval = setInterval(function(){
                 //console.log(redimensiona.values[numInterval].z);
@@ -262,7 +263,7 @@ for(var c=0; c< countriesByClassName.length; c++){
                     redimensiona.numInterval = 0;
                     panZoom.reset();
                     if(redimensiona.zoom){
-                        acercar();
+                        acercar(idPais);
                         redimensiona.zoom = false;
                     }
                 }
@@ -271,15 +272,15 @@ for(var c=0; c< countriesByClassName.length; c++){
         }
     }
     az = 1;
-    function acercar(){
+    function acercar(idPais){
         panZoom.reset();
         let actualZoom = panZoom.getZoom();
         let progresoZoom = 0.1;
         let limiteZoom = 3;
         let z = actualZoom + progresoZoom ;
         let divisorTiempos = (limiteZoom - z )/progresoZoom  //Math.abs((limiteZoom - z )/progresoZoom);
-        let paisCenterX = 4250;
-        let paisCenterY = 5200;
+        let paisCenterX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
+        let paisCenterY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
         let x = paisCenterX*panZoom.getSizes().realZoom;
         let y = paisCenterY*panZoom.getSizes().realZoom;
         let realX = panZoom.getSizes().viewBox.width;
