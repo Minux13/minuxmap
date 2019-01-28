@@ -83,7 +83,7 @@
         /*font-size: 0.9em;*/
         margin: 0 3px;
     }
-    #ask{
+    #question{
         margin: 10px 0 15px 0;
     }
     
@@ -100,14 +100,10 @@
             <span class="iconScore"><i class="far fa-times-circle"></i></span> 0
         </div>
     </div>
-    <div id="ask">¿Dónde se esta?</div>
+    <div id="question"></div>
     <div id="iscorrect" ></div>
 
 	<div id="container" ></div>
-    <button onclick="panZoom.pan({x:-4250*panZoom.getSizes().realZoom + (panZoom.getSizes().width/2),y:-7000*panZoom.getSizes().realZoom + (panZoom.getSizes().height/2)});">España</button>
-    <button onclick="redimensiona.zoom = true;redimensiona.start();">Progresivo España</button>
-    <button onclick="redimensiona.start()">Devolver</button>
-    <button onclick="zoomSlow.startZoom()">Zoom y Pan</button>
 
 <script src="svgEuropa.js"></script>
 
@@ -132,8 +128,47 @@ function hoverArea(e){
 for(var c=0; c< countriesByClassName.length; c++){
     countriesByClassName[c].addEventListener("click", function(e){
         if(!clickDisabled){
-            document.getElementById("ask").innerHTML = e.path[0].id; 
-            console.log(e.path[0].id);
+            var currentClickId = e.path[0].id; 
+            var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
+
+
+
+            if( currentCountryIdQuestion == currentClickId ){
+                console.log("True");
+            }else{console.log("False");}
+
+            game.nextQuestion();
+/*	            areaClick.color = colorsGame.areaCorrect;
+	            areaClick.colorReal = areaClick.color;
+	            //areaClick.mouseEnabled = false;
+	            game.numberCorrects = game.numberCorrects + 1;
+                areaClick.baseSettings.selectedColor = areaClick.color;
+	            areaClick.validate();
+	            game.correct();
+	        }else{
+	            var area = map.getObjectById(game.countryCodeAsk);
+	            area.color = colorsGame.areaIncorrect;
+	            area.colorReal = area.color;
+                    area.baseSettings.selectedColor = area.color;
+	            //area.mouseEnabled = false;
+                    event.chart.selectObject();//Deselecciona pero reajusta el zoom del mapa
+                    //areaClick.baseSettings.selectedColor = colorsGame.areaHover;
+	            //areaClick.validate();
+		    map.zoomToGroup( [ area ] );
+	            area.validate();
+	            game.inCorrect();
+	        }
+
+*/
+
+
+
+
+
+
+
+
+
         }else {
             // enable click again
             clickDisabled = false;
@@ -149,332 +184,405 @@ for(var c=0; c< countriesByClassName.length; c++){
 
      var clickDisabled = false;
 // Don't use window.onLoad like this in production, because it can only listen to one function.
-      //window.onload = function() {
-        var eventsHandler;
+  //window.onload = function() {
+    var eventsHandler;
 
-        eventsHandler = {
-          haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel']
-        , init: function(options) {
-            var instance = options.instance
-              , initialScale = 1
-              , pannedX = 0
-              , pannedY = 0
+    eventsHandler = {
+      haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel']
+    , init: function(options) {
+        var instance = options.instance
+          , initialScale = 1
+          , pannedX = 0
+          , pannedY = 0
 
-            // Init Hammer
-            // Listen only for pointer and touch events
-            this.hammer = Hammer(options.svgElement, {
-              inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
-            })
+        // Init Hammer
+        // Listen only for pointer and touch events
+        this.hammer = Hammer(options.svgElement, {
+          inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+        })
 
-            // Enable pinch
-            this.hammer.get('pinch').set({enable: true})
+        // Enable pinch
+        this.hammer.get('pinch').set({enable: true})
 
-            // Handle double tap
-            this.hammer.on('doubletap', function(ev){
-              instance.zoomIn()
-            })
+        // Handle double tap
+        this.hammer.on('doubletap', function(ev){
+          instance.zoomIn()
+        })
 
-            // Handle pan
-            this.hammer.on('panstart panmove', function(ev){
-              // On pan start reset panned variables
-              if (ev.type === 'panstart') {
-                pannedX = 0
-                pannedY = 0
-              }
-
-              // Pan only the difference
-              instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
-              pannedX = ev.deltaX
-              pannedY = ev.deltaY
-            })
-
-            // Handle pinch
-            this.hammer.on('pinchstart pinchmove', function(ev){
-              // On pinch start remember initial zoom
-              if (ev.type === 'pinchstart') {
-                initialScale = instance.getZoom()
-                instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
-              }
-
-              instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
-            })
-
-            // Prevent moving the page on some devices when panning over SVG
-            options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
+        // Handle pan
+        this.hammer.on('panstart panmove', function(ev){
+          // On pan start reset panned variables
+          if (ev.type === 'panstart') {
+            pannedX = 0
+            pannedY = 0
           }
 
-        , destroy: function(){
-            this.hammer.destroy()
+          // Pan only the difference
+          instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
+          pannedX = ev.deltaX
+          pannedY = ev.deltaY
+        })
+
+        // Handle pinch
+        this.hammer.on('pinchstart pinchmove', function(ev){
+          // On pinch start remember initial zoom
+          if (ev.type === 'pinchstart') {
+            initialScale = instance.getZoom()
+            instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
           }
+
+          instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+        })
+
+        // Prevent moving the page on some devices when panning over SVG
+        options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
+      }
+
+    , destroy: function(){
+        this.hammer.destroy()
+      }
+    }
+
+    // Expose to window namespace for testing purposes
+    window.panZoom = svgPanZoom('#map', {
+      zoomEnabled: true
+    , controlIconsEnabled: false
+    , fit: 1
+    , center: 1
+    , customEventsHandler: eventsHandler
+    , beforePan : function(a,b){clickDisabled = true;}
+    });
+ // };
+
+panZoom.disableDblClickZoom();
+
+var redimensiona = {
+    values : [],
+    frames : 30,
+    initX : panZoom.getPan().x,
+    initY : panZoom.getPan().y,
+    setValues : function()  { 
+        var p = panZoom.getPan();
+        var z = panZoom.getZoom();
+        var px = p.x;
+        var py = p.y;
+        var mov = redimensiona.frames;
+        var avancePanX = (px -redimensiona.initX )/mov;
+        var avancePanY = (py -redimensiona.initY )/mov;
+        var retroZoom = (1-z)/mov;
+        
+        var cant = [];
+
+        for(var im=0; im<mov; im++){
+            px = px-avancePanX;
+            py = py-avancePanY;
+            z = z + retroZoom;
+            cant.push({x:px, y:py, z:z})
         }
 
-        // Expose to window namespace for testing purposes
-        window.panZoom = svgPanZoom('#map', {
-          zoomEnabled: true
-        , controlIconsEnabled: false
-        , fit: 1
-        , center: 1
-        , customEventsHandler: eventsHandler
-        , beforePan : function(a,b){clickDisabled = true;}
-        });
-     // };
-
-    panZoom.disableDblClickZoom();
-
-    var redimensiona = {
-        values : [],
-        frames : 30,
-        initX : panZoom.getPan().x,
-        initY : panZoom.getPan().y,
-        setValues : function()  { 
-            var p = panZoom.getPan();
-            var z = panZoom.getZoom();
-            var px = p.x;
-            var py = p.y;
-            var mov = redimensiona.frames;
-            var avancePanX = (px -redimensiona.initX )/mov;
-            var avancePanY = (py -redimensiona.initY )/mov;
-            var retroZoom = (1-z)/mov;
-            
-            var cant = [];
-
-            for(var im=0; im<mov; im++){
-                px = px-avancePanX;
-                py = py-avancePanY;
-                z = z + retroZoom;
-                cant.push({x:px, y:py, z:z})
+        redimensiona.values = cant;
+    } ,
+    interval : 0,
+    numInterval : 0, 
+    zoom: false, 
+    start : function(idPais){ 
+        redimensiona.setValues();
+        redimensiona.interval = setInterval(function(){
+            //console.log(redimensiona.values[numInterval].z);
+            var r = redimensiona.values;
+            panZoom.zoom(r[redimensiona.numInterval].z);
+            panZoom.pan({ x: (r[redimensiona.numInterval].x), y: (r[redimensiona.numInterval].y)});
+            redimensiona.numInterval++;
+            if(redimensiona.numInterval >= (redimensiona.frames)){
+                clearInterval(redimensiona.interval)
+                redimensiona.numInterval = 0;
+                panZoom.reset();
+                if(redimensiona.zoom){
+                    acercar(idPais);
+                    redimensiona.zoom = false;
+                }
             }
+        }, 20);
+        
+    }
+}
+az = 1;
+function acercar(idPais){
+    panZoom.reset();
+    let actualZoom = panZoom.getZoom();
+    let progresoZoom = 0.1;
+    let limiteZoom = 3;
+    let z = actualZoom + progresoZoom ;
+    let divisorTiempos = (limiteZoom - z )/progresoZoom  //Math.abs((limiteZoom - z )/progresoZoom);
+    let paisCenterX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
+    let paisCenterY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
+    let x = paisCenterX*panZoom.getSizes().realZoom;
+    let y = paisCenterY*panZoom.getSizes().realZoom;
+    let realX = panZoom.getSizes().viewBox.width;
+    let realY = panZoom.getSizes().viewBox.height;
+    let lapsoX = ((realX/2)-paisCenterX) / divisorTiempos;
+    let lapsoY = ((realY/2)-paisCenterY) / divisorTiempos;
+    let lapsoNum = 1;
+    let frames = setInterval( function(){ 
+        panZoom.zoom(z);
+        let enfoqueX = (realX/2) - ( lapsoNum * lapsoX);
+        let enfoqueY = (realY/2) - ( lapsoNum * lapsoY);
+        let panX = -1 * enfoqueX *panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
+        let panY = -1 * enfoqueY *panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
+        panZoom.pan({x: panX ,y: panY});
+        //panZoom.zoomAtPoint(z, {x:x,y:y});        
+        z+= progresoZoom ;
+
+        lapsoNum++;
+
+        console.log(panX, panY);
+        if( z > limiteZoom){
+            clearInterval(frames)        
+        }
+    }, 50 )
+}
+
+var zoomSlow = {
+    frames         : undefined
+    ,setThisValues : function(){
+        this.actualZoom     = panZoom.getZoom();
+        this.zoomPara3      = 3 - this.actualZoom;
+        this.aumentoZoom    = (this.zoomPara3/Math.abs(this.zoomPara3))*0.6;
+        this.numFrames      = Math.abs(this.zoomPara3/0.6);
+        this.frameZoom      = 1;
+        this.framesZoom     = undefined;
+        /////
+        this.divisorTiempos = 20;
+        this.PAISCENTERX    = 4250 - (panZoom.getSizes().width/2  / panZoom.getSizes().realZoom);
+        this.PAISCENTERY    = 7000 - (panZoom.getSizes().height/2 / panZoom.getSizes().realZoom);
+        this.ORIGINX        = panZoom.getPan().x / panZoom.getSizes().realZoom * -1;
+        this.ORIGINY        = panZoom.getPan().y / panZoom.getSizes().realZoom * -1;
+        this.LAPSOX         = (this.ORIGINX-this.PAISCENTERX) / this.divisorTiempos;
+        this.LAPSOY         = (this.ORIGINY-this.PAISCENTERY) / this.divisorTiempos;
+        this.lapsoNum       = 1;
+    }
+    ,startPan : function(){
+        zoomSlow.setThisValues();
+        zoomSlow.frames = setInterval( function(){ 
+            let ENFOQUEX = zoomSlow.ORIGINX - ( zoomSlow.lapsoNum * zoomSlow.LAPSOX);
+            let ENFOQUEY = zoomSlow.ORIGINY - ( zoomSlow.lapsoNum * zoomSlow.LAPSOY);
+            let panX = -1 * ENFOQUEX * panZoom.getSizes().realZoom ;
+            let panY = -1 * ENFOQUEY * panZoom.getSizes().realZoom ;
+            panZoom.pan({x: panX, y: panY });
     
-            redimensiona.values = cant;
-        } ,
-        interval : 0,
-        numInterval : 0, 
-        zoom: false, 
-        start : function(idPais){ 
-            redimensiona.setValues();
-            redimensiona.interval = setInterval(function(){
-                //console.log(redimensiona.values[numInterval].z);
-                var r = redimensiona.values;
-                panZoom.zoom(r[redimensiona.numInterval].z);
-                panZoom.pan({ x: (r[redimensiona.numInterval].x), y: (r[redimensiona.numInterval].y)});
-                redimensiona.numInterval++;
-                if(redimensiona.numInterval >= (redimensiona.frames)){
-                    clearInterval(redimensiona.interval)
-                    redimensiona.numInterval = 0;
-                    panZoom.reset();
-                    if(redimensiona.zoom){
-                        acercar(idPais);
-                        redimensiona.zoom = false;
-                    }
-                }
-            }, 20);
-            
-        }
-    }
-    az = 1;
-    function acercar(idPais){
-        panZoom.reset();
-        let actualZoom = panZoom.getZoom();
-        let progresoZoom = 0.1;
-        let limiteZoom = 3;
-        let z = actualZoom + progresoZoom ;
-        let divisorTiempos = (limiteZoom - z )/progresoZoom  //Math.abs((limiteZoom - z )/progresoZoom);
-        let paisCenterX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
-        let paisCenterY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
-        let x = paisCenterX*panZoom.getSizes().realZoom;
-        let y = paisCenterY*panZoom.getSizes().realZoom;
-        let realX = panZoom.getSizes().viewBox.width;
-        let realY = panZoom.getSizes().viewBox.height;
-        let lapsoX = ((realX/2)-paisCenterX) / divisorTiempos;
-        let lapsoY = ((realY/2)-paisCenterY) / divisorTiempos;
-        let lapsoNum = 1;
-        let frames = setInterval( function(){ 
-            panZoom.zoom(z);
-            let enfoqueX = (realX/2) - ( lapsoNum * lapsoX);
-            let enfoqueY = (realY/2) - ( lapsoNum * lapsoY);
-            let panX = -1 * enfoqueX *panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
-            let panY = -1 * enfoqueY *panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
-            panZoom.pan({x: panX ,y: panY});
-            //panZoom.zoomAtPoint(z, {x:x,y:y});        
-            z+= progresoZoom ;
-
-            lapsoNum++;
-
-            console.log(panX, panY);
-            if( z > limiteZoom){
-                clearInterval(frames)        
-            }
-        }, 50 )
-    }
-
-    var zoomSlow = {
-        frames         : undefined
-        ,setThisValues : function(){
-            this.actualZoom     = panZoom.getZoom();
-            this.zoomPara3      = 3 - this.actualZoom;
-            this.aumentoZoom    = (this.zoomPara3/Math.abs(this.zoomPara3))*0.6;
-            this.numFrames      = Math.abs(this.zoomPara3/0.6);
-            this.frameZoom      = 1;
-            this.framesZoom     = undefined;
-            /////
-            this.divisorTiempos = 20;
-            this.PAISCENTERX    = 4250 - (panZoom.getSizes().width/2  / panZoom.getSizes().realZoom);
-            this.PAISCENTERY    = 7000 - (panZoom.getSizes().height/2 / panZoom.getSizes().realZoom);
-            this.ORIGINX        = panZoom.getPan().x / panZoom.getSizes().realZoom * -1;
-            this.ORIGINY        = panZoom.getPan().y / panZoom.getSizes().realZoom * -1;
-            this.LAPSOX         = (this.ORIGINX-this.PAISCENTERX) / this.divisorTiempos;
-            this.LAPSOY         = (this.ORIGINY-this.PAISCENTERY) / this.divisorTiempos;
-            this.lapsoNum       = 1;
-        }
-        ,startPan : function(){
-            zoomSlow.setThisValues();
-            zoomSlow.frames = setInterval( function(){ 
-                let ENFOQUEX = zoomSlow.ORIGINX - ( zoomSlow.lapsoNum * zoomSlow.LAPSOX);
-                let ENFOQUEY = zoomSlow.ORIGINY - ( zoomSlow.lapsoNum * zoomSlow.LAPSOY);
-                let panX = -1 * ENFOQUEX * panZoom.getSizes().realZoom ;
-                let panY = -1 * ENFOQUEY * panZoom.getSizes().realZoom ;
-                panZoom.pan({x: panX, y: panY });
-        
-                zoomSlow.lapsoNum++;
-        
-                //console.log(ENFOQUEX, this.ORIGINX, panX, panY);
-                if( zoomSlow.lapsoNum>zoomSlow.divisorTiempos){
-                    clearInterval(zoomSlow.frames)        
-                }
-            }, 50 )       
-        }
-        ,startZoom : function(){
-            zoomSlow.setThisValues();
-            this.framesZoom = setInterval(function(){
-                if(zoomSlow.frameZoom > zoomSlow.numFrames){
-                    clearInterval(zoomSlow.framesZoom);
-                    zoomSlow.frameZoom = 0;
-                    zoomSlow.startPan();
-                }else{
-                    let zoom =  zoomSlow.actualZoom + (zoomSlow.aumentoZoom*zoomSlow.frameZoom);
-                    console.log(  zoom )
-                    panZoom.zoom( zoom )
-                    zoomSlow.frameZoom ++;
-                }
-            }, 100)
-        }
-    };
-    zoomSlow.setThisValues();
-
-
-    var acerca = {
-        values : [],
-        frames : 30,
-        initX : panZoom.getPan().x,
-        initY : panZoom.getPan().y,
-        setValues : function()  { 
-            var p = panZoom.getPan();
-            var z = panZoom.getZoom();
-            var px = p.x;
-            var py = p.y;
-            var mov = acerca.frames;
-            var avancePanX = (px -acerca.initX )/mov;
-            var avancePanY = (py -acerca.initY )/mov;
-            var retroZoom = (1-z)/mov;
-            
-            var cant = [];
-
-            for(var im=0; im<mov; im++){
-                px = px-avancePanX;
-                py = py-avancePanY;
-                z = z + retroZoom;
-                cant.push({x:px, y:py, z:z})
-            }
+            zoomSlow.lapsoNum++;
     
-            acerca.values = cant;
-        } ,
-        interval : 0,
-        numInterval : 0,  
-        start : function(){ 
-            acerca.setValues();
-            acerca.interval = setInterval(function(){
-                var r = acerca.values;
-                panZoom.zoom(r[acerca.numInterval].z);
-                panZoom.pan({ x: (r[acerca.numInterval].x), y: (r[acerca.numInterval].y)});
-                acerca.numInterval++;
-                if(acerca.numInterval >= (acerca.frames)){
-                    
-                    panZoom.reset();
-                }else if(acerca.numInterval >= (acerca.frames*2)){
-                    clearInterval(acerca.interval)
-                    acerca.numInterval = 0;
-                    panZoom.reset();
-                }
+            //console.log(ENFOQUEX, this.ORIGINX, panX, panY);
+            if( zoomSlow.lapsoNum>zoomSlow.divisorTiempos){
+                clearInterval(zoomSlow.frames)        
+            }
+        }, 50 )       
+    }
+    ,startZoom : function(){
+        zoomSlow.setThisValues();
+        this.framesZoom = setInterval(function(){
+            if(zoomSlow.frameZoom > zoomSlow.numFrames){
+                clearInterval(zoomSlow.framesZoom);
+                zoomSlow.frameZoom = 0;
+                zoomSlow.startPan();
+            }else{
+                let zoom =  zoomSlow.actualZoom + (zoomSlow.aumentoZoom*zoomSlow.frameZoom);
+                console.log(  zoom )
+                panZoom.zoom( zoom )
+                zoomSlow.frameZoom ++;
+            }
+        }, 100)
+    }
+};
+zoomSlow.setThisValues();
 
-            }, 20);
-            
+
+var acerca = {
+    values : [],
+    frames : 30,
+    initX : panZoom.getPan().x,
+    initY : panZoom.getPan().y,
+    setValues : function()  { 
+        var p = panZoom.getPan();
+        var z = panZoom.getZoom();
+        var px = p.x;
+        var py = p.y;
+        var mov = acerca.frames;
+        var avancePanX = (px -acerca.initX )/mov;
+        var avancePanY = (py -acerca.initY )/mov;
+        var retroZoom = (1-z)/mov;
+        
+        var cant = [];
+
+        for(var im=0; im<mov; im++){
+            px = px-avancePanX;
+            py = py-avancePanY;
+            z = z + retroZoom;
+            cant.push({x:px, y:py, z:z})
         }
+
+        acerca.values = cant;
+    } ,
+    interval : 0,
+    numInterval : 0,  
+    start : function(){ 
+        acerca.setValues();
+        acerca.interval = setInterval(function(){
+            var r = acerca.values;
+            panZoom.zoom(r[acerca.numInterval].z);
+            panZoom.pan({ x: (r[acerca.numInterval].x), y: (r[acerca.numInterval].y)});
+            acerca.numInterval++;
+            if(acerca.numInterval >= (acerca.frames)){
+                
+                panZoom.reset();
+            }else if(acerca.numInterval >= (acerca.frames*2)){
+                clearInterval(acerca.interval)
+                acerca.numInterval = 0;
+                panZoom.reset();
+            }
+
+        }, 20);
+        
     }
+}
 
 
-    function paisesChicos(x,y, id){
-        var radio = 100;
-        var diam = radio*2;
-        var mx = x - radio;
-        var my = y - radio/2;
-        var dosT = (diam)*(0.666);
-        var c1x = [ mx, mx+diam, mx+diam];
-        var c1y = [ my+dosT, my+dosT, my];
-        var c2x = [ mx+diam, mx, mx];
-        var c2y = [ my-dosT, my-dosT, my];
-        d = 'M ' + mx + ',' + my + ' C ';
-        d+= c1x[0] + ',' + c1y[0] + ' ';
-        d+= c1x[1] + ',' + c1y[1] + ' ';
-        d+= c1x[2] + ',' + c1y[2] + ' C ';
-        d+= c2x[0] + ',' + c2y[0] + ' ';
-        d+= c2x[1] + ',' + c2y[1] + ' ';
-        d+= c2x[2] + ',' + c2y[2] + ' ';
-        d+= 'z ';
-        document.getElementById(id).setAttribute('d', d)
-        return d;
+function paisesChicos(x,y, id){
+    var radio = 100;
+    var diam = radio*2;
+    var mx = x - radio;
+    var my = y - radio/2;
+    var dosT = (diam)*(0.666);
+    var c1x = [ mx, mx+diam, mx+diam];
+    var c1y = [ my+dosT, my+dosT, my];
+    var c2x = [ mx+diam, mx, mx];
+    var c2y = [ my-dosT, my-dosT, my];
+    d = 'M ' + mx + ',' + my + ' C ';
+    d+= c1x[0] + ',' + c1y[0] + ' ';
+    d+= c1x[1] + ',' + c1y[1] + ' ';
+    d+= c1x[2] + ',' + c1y[2] + ' C ';
+    d+= c2x[0] + ',' + c2y[0] + ' ';
+    d+= c2x[1] + ',' + c2y[1] + ' ';
+    d+= c2x[2] + ',' + c2y[2] + ' ';
+    d+= 'z ';
+    document.getElementById(id).setAttribute('d', d)
+    return d;
 
+}
+
+
+function zoomEnp(idE){
+    var eee = document.getElementById("map")
+    var iii = document.getElementById(idE)
+
+    elem = iii;
+    var position = $(elem).offset();
+    var parentOffset = $("#map").offset();
+    
+    position.top -= parentOffset.top;
+    position.left -= parentOffset.left;
+    
+    {
+      let width = $("#map").width();
+      let height = $("#map").height();
+      let xx = width/2 - position.left;
+      let yy = height/2 - position.top ;
+
+    
+      //document.getElementById('map').querySelector('rect').setAttribute('width', 12386.153)
+      
+      var svgns = "http://www.w3.org/2000/svg";
+      var circle = document.createElementNS(svgns, 'circle');
+      circle.setAttributeNS(null, 'cx', xx);
+      circle.setAttributeNS(null, 'cy', yy);
+      circle.setAttributeNS(null, 'r', 5);
+      //circle.setAttribute( 'height', '150');
+      //circle.setAttribute( 'width', '150');
+      circle.setAttribute( 'fill', 'red');
+      document.getElementById('map').appendChild(circle); 
+      //console.log(circle);
+      //this.panZoom.panBy({x: xx, y: yy });
+    }        
+        
+}
+
+
+
+game = {
+    countriesId : ["is","pt","es","ch","at","cz","sk","be","it","by","pl","fi","de","se","no","ua","ie","gb","cy","tr","hu","lt","lv","md","bg","al","ee","fr","nl","ba","si","mk","hr","dk","me","rs","xk","gr","im","ro","ru","ad","mc","lu","li","sm","va","mt"],
+    setRandomArrayCountriesCodes: function(){
+        var totalCountries = game.countriesId.length;
+        var newArrayContriesId = [];
+        for(let c = 0; c < totalCountries; c ++ ){
+            var newNumTotalCountries = game.countriesId.length;
+            var randomNum = Math.floor(Math.random() * newNumTotalCountries);
+            newArrayContriesId.push( game.countriesId[ randomNum ] );
+            game.countriesId.splice(randomNum, 1);
+        }
+        game.countriesId = newArrayContriesId;
+    },
+    currentNumCountryQuestion : 0,
+    setQuestion : function(){
+        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
+        var question = '¿Dónde se encuentra ' + countryElement.translations.spa.common + '?';
+        //var question = '¿Dónde se encuentra ' + countryElement.name.common + '?';
+        document.getElementById('question').innerHTML = question ;
+
+    },
+    nextQuestion: function(){
+        game.currentNumCountryQuestion ++;
+        game.setQuestion();
+    },
+
+    setRandomCountryCode : function(){
+        var numCountrys = this.codes.length;
+        if( numCountrys > 0 ){
+            var randomCodeNum = Math.floor(Math.random() * numCountrys); 
+            game.countryCodeAsk = game.codes[randomCodeNum];
+            this.codes.splice(randomCodeNum, 1);
+            this.changeAsk();
+        }else{
+            document.getElementById('question').innerHTML = "Correctos " + game.numberCorrects +" de "+ game.numberAreas +" paises";
+            map.clickMapObject = function(){;}
+            map.balloon.enabled = true;
+        }
+    },
+    numberAreas : 0,
+    numberCorrects: 0,
+    timer : "",
+    setTimer: function(){
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function(){
+            document.getElementById("iscorrect").className = "hidealert";
+	        map.goHome();
+        }, 1500);   
+    },
+    correct: function(){
+        var checkElement = document.getElementById("iscorrect");
+        checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'>  &#x2713; Correcto </span>";
+    	checkElement.style.background = "#3630d4";
+        checkElement.className = "showalert";
+        this.setRandomCountryCode();
+        this.setTimer();
+    },
+    inCorrect: function(){
+        var checkElement = document.getElementById("iscorrect");
+        checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'> &#x2717 Incorrecto </span>";
+	    checkElement.style.background = "#d66";
+        checkElement.className = "showalert";
+        this.setRandomCountryCode();
+        this.setTimer();
+    },
+    changeAsk: function(){
+	    var spanishAreaName = map.getObjectById(game.countryCodeAsk).titleTr;
+	    if( !spanishAreaName ){
+	        spanishAreaName = map.getObjectById(game.countryCodeAsk).title;	    
+	    }
+        document.getElementById('question').innerHTML = '¿Dónde se encuentra '+ spanishAreaName +'?';
     }
-
-aaa = [];
-    function zoomEnp(idE){
-        var eee = document.getElementById("map")
-        var iii = document.getElementById(idE)
-
-        elem = iii;
-        var position = $(elem).offset();
-        var parentOffset = $("#map").offset();
-        
-        position.top -= parentOffset.top;
-        position.left -= parentOffset.left;
-        
-        aaa.push(position)
-        aaa.push(parentOffset)
-        
-        {
-          let width = $("#map").width();
-          let height = $("#map").height();
-          let xx = width/2 - position.left;
-          let yy = height/2 - position.top ;
-
-        
-          //document.getElementById('map').querySelector('rect').setAttribute('width', 12386.153)
-          
-          var svgns = "http://www.w3.org/2000/svg";
-          var circle = document.createElementNS(svgns, 'circle');
-          circle.setAttributeNS(null, 'cx', xx);
-          circle.setAttributeNS(null, 'cy', yy);
-          circle.setAttributeNS(null, 'r', 5);
-          //circle.setAttribute( 'height', '150');
-          //circle.setAttribute( 'width', '150');
-          circle.setAttribute( 'fill', 'red');
-          document.getElementById('map').appendChild(circle); 
-
-          //this.panZoom.panBy({x: xx, y: yy });
-        }        
-            
-    }
-
-
+}
+game.setRandomArrayCountriesCodes();
+game.setQuestion();
 </script>
 
 </body>
