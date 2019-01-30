@@ -19,13 +19,18 @@
     <style>
     
     #container{
-        width: 80%;
         /*overflow: auto;*/
+        width: 100%;
         margin: auto;
         position: relative;
-        background: linear-gradient(220deg,#559, #99c,#aab,#559);
-        box-shadow: 0px 5px 20px #000;
+        background: transparent; /*linear-gradient(220deg,#559, #99c,#aab,#559);*/
         height: calc(100vh - 200px);
+        background: linear-gradient(220deg,#559, #99c,#aab,#559);
+    }
+    #all-container{
+        margin: auto;
+        width: 80%;
+        box-shadow: 0px 5px 20px #000;
     }
     #map{
         background: transparent;/*#a9b9f0; /*#dfe9fc;*/
@@ -141,6 +146,17 @@
         color: blue ;
         border: none;
     }
+    .selectcountry{
+        width: 25%;
+        text-align: center;
+        padding: 5px 0;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    #list-countries{
+        display: flex;
+        width: 100%;
+    }
     </style>
     
 </head>
@@ -165,14 +181,26 @@
         </div>
 
     </div>
+
     <a href="http://minux.pw"><div id="logominux"><i class="fas fa-home"></i></div></a>
     <div id="question"></div>
     <div id="iscorrect" ></div>
 
-	<div id="container" ></div>
-<button onclick="panZoom.reset();">dddddd</button>
-<button onclick='document.getElementById("map").setAttribute("class", "mapeffect"); panZoom.zoomAtPoint(3, {x:400, y:485});' >eeeee</button>
-<script src="svgEuropa.js"></script>
+	<div id="all-container" >
+	    <div id="list-countries" >
+	        <div class="selectcountry" style="background: #a6a6c0">America</div>
+	        <div class="selectcountry" style="background: rgba(150,150,250,0.6);color: white;">Europa</div>
+	        <div class="selectcountry" style="background: rgba(150,150,250,0.6);color: white;">Africa</div>
+	        <div class="selectcountry" style="background: rgba(150,150,250,0.6);color: white;">Asia</div>
+        </div>
+	    <div id="container" ></div>
+    </div>
+    <!--
+    <button onclick="panZoom.reset();">dddddd</button>
+    <button onclick='document.getElementById("map").setAttribute("class", "mapeffect"); panZoom.zoomAtPoint(3, {x:400, y:485});' >eeeee</button>
+    -->
+
+    <script src="svgEuropa.js"></script>
 
 <script>
 var countriesByClassName = document.getElementsByClassName("europe");

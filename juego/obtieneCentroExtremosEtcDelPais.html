@@ -82,12 +82,6 @@ var mxCountries = [];
 <script>
 
 
-/*var countriesByClassName = document.getElementsByClassName("europe");
-for(var c=0; c< countriesByClassName.length; c++){
-    countriesByClassName[c].addEventListener();
-}*/
-
-
 function stringToFloat(coordenates){
     path=[];
     for(let i=0; i<coordenates.length; i++){
@@ -135,12 +129,48 @@ function getArrayPositions(pais){
     return restaPosicion(points)
 }
 
+function setAttrHandly(pais, xx, yy){
+    var pathO = getArrayPositions(pais);
+    var minx =  pathO[1].x[0];
+    var miny =  pathO[1].y[0];
+    var maxx =  pathO[1].x[0];
+    var maxy =  pathO[1].y[0];
+
+    //Toma cada M C L...
+    for(let i=1; i<pathO.length; i++){
+        //Desgloza cada coordenada x-y del M C L
+        for(let j=0; j<pathO[i].x.length; j++){
+            let x = pathO[i].x[j];
+            let y = pathO[i].y[j];
+
+            if( x < minx ) { minx = x; }
+            if( x > maxx ) { maxx = x; }
+            if( y < miny ) { miny = y; }
+            if( y > maxy ) { maxy = y; }
+
+        }
+    }
+
+    
+
+    document.getElementById(pais).setAttribute("minx",   minx)
+    document.getElementById(pais).setAttribute("maxx",   maxx)
+    document.getElementById(pais).setAttribute("miny",   miny)
+    document.getElementById(pais).setAttribute("maxy",   maxy)
+    document.getElementById(pais).setAttribute("centerx", (maxx+minx)/2 + xx )
+    document.getElementById(pais).setAttribute("centery", (maxy+miny)/2 + yy)
+    
+    //document.getElementById("centerprueba").setAttribute("cx", (maxx+minx)/2 )
+    //document.getElementById("centerprueba").setAttribute("cy", (maxy+miny)/2 )
+    document.getElementById("ask").innerHTML = minux_countries_codes[pais].translations.spa.common;
+    puntoRojo(pais)
+}
 
 function setAttr(pais){
     var pathO = getArrayPositions(pais);
     var minx =  pathO[1].x[0];
-    var miny =  pathO[1].x[0];
-    var maxx =  pathO[1].y[0];
+    var miny =  pathO[1].y[0];
+    var maxx =  pathO[1].x[0];
     var maxy =  pathO[1].y[0];
 
     //Toma cada M C L...
@@ -164,12 +194,36 @@ function setAttr(pais){
     document.getElementById(pais).setAttribute("centerx", (maxx+minx)/2 )
     document.getElementById(pais).setAttribute("centery", (maxy+miny)/2 )
     
-    document.getElementById("centerprueba").setAttribute("cx", (maxx+minx)/2 )
-    document.getElementById("centerprueba").setAttribute("cy", (maxy+miny)/2 )
+    //document.getElementById("centerprueba").setAttribute("cx", (maxx+minx)/2 )
+    //document.getElementById("centerprueba").setAttribute("cy", (maxy+miny)/2 )
     document.getElementById("ask").innerHTML = minux_countries_codes[pais].translations.spa.common;
 }
 
+function setAttrAllCountries(){
+    var countriesByClassName = document.getElementsByClassName("europe");
 
+    for(var c=0; c< countriesByClassName.length; c++){
+        var id = countriesByClassName[c].id;
+        setAttr( id );
+    }
+        
+}
+setAttrAllCountries();
+
+
+var countriesByClassName = document.getElementsByClassName("europe");
+var c = 0;
+
+function puntoRojo(id){
+    var paisId = countriesByClassName[c].id
+    console.log(minux_countries_codes[paisId].translations.spa.common);
+    //var elementCountryById = countriesByClassName[c];
+    var elementCountryById = document.getElementById(id );
+    document.getElementById("centerprueba").setAttribute("cx", elementCountryById.getAttribute("centerx") );
+    document.getElementById("centerprueba").setAttribute("cy", elementCountryById.getAttribute("centery") );
+    c++;
+}
+//var inte = setInterval(puntoRojo, 3000);
 
 </script>
 

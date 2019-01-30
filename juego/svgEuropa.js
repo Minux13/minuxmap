@@ -223,9 +223,6 @@ document.getElementById("container").innerHTML =` <svg
     <circle id="centerprueba" cx="8800" cy="500" r="100" fill="red">
     -->
 
-    <circle id="centerprueba" cx="2000" cy="500" r="100" fill="black"></circle>
-    <circle id="ddd" cx="0" cy="0" r="50" fill="blue"></circle>
-
        </g>
 
       <!--

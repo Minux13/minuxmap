@@ -134,19 +134,32 @@ function getArrayPositions(pais){
 }
 //var pathO = getArrayPositions("de");
 
-function moveVertical(px, pais){
+function moveVertical(Xpx, Ypx, pais){
     var pathO = getArrayPositions(pais);
     var str = "";
     for(let i=1; i<pathO.length; i++){
         str += pathO[i].p;
         str += " ";
         for(let j=0; j<pathO[i].x.length; j++){
-            let y = pathO[i].y[j] + px;
-            str += pathO[i].x[j] + "," + y + " "
+            let x = pathO[i].x[j] + Xpx;
+            let y = pathO[i].y[j] + Ypx;
+            str += x + "," + y + " "
         }
     }
+    str += "z ";
     document.getElementById(pais).setAttribute("d", str)
 }
+
+function moveAll(xPx, yPx){
+    var countriesByClassName = document.getElementsByClassName("europe");
+
+    for(var c=0; c< countriesByClassName.length; c++){
+        var id = countriesByClassName[c].id;
+        moveVertical( xPx, yPx, id );
+    }
+        
+}
+
 
 document.getElementsByClassName("eu")
 
