@@ -40,7 +40,7 @@
     }
     @media only screen and (max-width: 600px) {
         #container {
-            width: 100%;
+            width: 75%;
         }
     }
     body{
@@ -155,7 +155,7 @@
         </div>
         -->
         <div id="languaje" style="color: blue;" >
-            <select id="selectlanguaje" onchange="game.setQuestion();">
+            <select id="selectlanguaje" onchange="game.setQuestionInnerText();">
                 <option class="opcionlang" selected value="spanish">Español</option>
                 <option class="opcionlang" value="english">English</option>
                 <option class="opcionlang" value="french">Français</option>
@@ -175,137 +175,82 @@
 <script src="svgEuropa.js"></script>
 
 <script>
-var countriesByClassName = document.getElementsByClassName("europe");
 
+var clickDisabled = false;
 
-for(var c=0; c< countriesByClassName.length; c++){
-    countriesByClassName[c].addEventListener("click", function(e){
-        if(!clickDisabled){
-            var currentClickId = e.path[0].id; 
-            var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
+// Don't use window.onLoad like this in production, because it can only listen to one function.
+//window.onload = function() {
+var eventsHandler;
 
-            
+eventsHandler = {
+  haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel']
+, init: function(options) {
+    var instance = options.instance
+      , initialScale = 1
+      , pannedX = 0
+      , pannedY = 0
 
-            if( currentCountryIdQuestion == currentClickId ){
-                console.log("True");
-            }else{
-                console.log("False");
-                redimensiona.zoom = true;
-                document.getElementById("map").setAttribute("class", "mapeffect");
-                panZoom.reset();
-                //redimensiona.start( currentCountryIdQuestion );
-            }
+    // Init Hammer
+    // Listen only for pointer and touch events
+    this.hammer = Hammer(options.svgElement, {
+      inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+    })
 
-            game.nextQuestion();
-/*	            areaClick.color = colorsGame.areaCorrect;
-	            areaClick.colorReal = areaClick.color;
-	            //areaClick.mouseEnabled = false;
-	            game.numberCorrects = game.numberCorrects + 1;
-                areaClick.baseSettings.selectedColor = areaClick.color;
-	            areaClick.validate();
-	            game.correct();
-	        }else{
-	            var area = map.getObjectById(game.countryCodeAsk);
-	            area.color = colorsGame.areaIncorrect;
-	            area.colorReal = area.color;
-                    area.baseSettings.selectedColor = area.color;
-	            //area.mouseEnabled = false;
-                    event.chart.selectObject();//Deselecciona pero reajusta el zoom del mapa
-                    //areaClick.baseSettings.selectedColor = colorsGame.areaHover;
-	            //areaClick.validate();
-		    map.zoomToGroup( [ area ] );
-	            area.validate();
-	            game.inCorrect();
-	        }
+    // Enable pinch
+    this.hammer.get('pinch').set({enable: true})
 
-*/
+    // Handle double tap
+    this.hammer.on('doubletap', function(ev){
+      instance.zoomIn()
+    })
 
+    // Handle pan
+    this.hammer.on('panstart panmove', function(ev){
+      // On pan start reset panned variables
+      if (ev.type === 'panstart') {
+        pannedX = 0
+        pannedY = 0
+      }
 
-        }else {
-            // enable click again
-            clickDisabled = false;
-        }});
+      // Pan only the difference
+      instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
+      pannedX = ev.deltaX
+      pannedY = ev.deltaY
+    })
 
+    // Handle pinch
+    this.hammer.on('pinchstart pinchmove', function(ev){
+      // On pinch start remember initial zoom
+      if (ev.type === 'pinchstart') {
+        initialScale = instance.getZoom()
+        instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+      }
+
+      instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+    })
+
+    // Prevent moving the page on some devices when panning over SVG
+    options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
+  }
+
+, destroy: function(){
+    this.hammer.destroy()
+  }
 }
 
-
-
-
-
-
-     var clickDisabled = false;
-// Don't use window.onLoad like this in production, because it can only listen to one function.
-  //window.onload = function() {
-    var eventsHandler;
-
-    eventsHandler = {
-      haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel']
-    , init: function(options) {
-        var instance = options.instance
-          , initialScale = 1
-          , pannedX = 0
-          , pannedY = 0
-
-        // Init Hammer
-        // Listen only for pointer and touch events
-        this.hammer = Hammer(options.svgElement, {
-          inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
-        })
-
-        // Enable pinch
-        this.hammer.get('pinch').set({enable: true})
-
-        // Handle double tap
-        this.hammer.on('doubletap', function(ev){
-          instance.zoomIn()
-        })
-
-        // Handle pan
-        this.hammer.on('panstart panmove', function(ev){
-          // On pan start reset panned variables
-          if (ev.type === 'panstart') {
-            pannedX = 0
-            pannedY = 0
-          }
-
-          // Pan only the difference
-          instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
-          pannedX = ev.deltaX
-          pannedY = ev.deltaY
-        })
-
-        // Handle pinch
-        this.hammer.on('pinchstart pinchmove', function(ev){
-          // On pinch start remember initial zoom
-          if (ev.type === 'pinchstart') {
-            initialScale = instance.getZoom()
-            instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
-          }
-
-          instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
-        })
-
-        // Prevent moving the page on some devices when panning over SVG
-        options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
-      }
-
-    , destroy: function(){
-        this.hammer.destroy()
-      }
-    }
-
-    // Expose to window namespace for testing purposes
-    window.panZoom = svgPanZoom('#map', {
-      zoomEnabled: true
-    , controlIconsEnabled: false
-    , fit: 1
-    , center: 1
-    , customEventsHandler: eventsHandler
-    , beforePan : function(a,b){clickDisabled = true;}
-    });
- // };
+// Expose to window namespace for testing purposes
+window.panZoom = svgPanZoom('#map', {
+  zoomEnabled: true
+, controlIconsEnabled: false
+, fit: 1
+, center: 1
+, customEventsHandler: eventsHandler
+, beforePan : function(a,b){clickDisabled = true;}
+});
 
 panZoom.disableDblClickZoom();
+
+
 
 var redimensiona = {
     values : [],
@@ -509,30 +454,6 @@ var acerca = {
 }
 
 
-function paisesChicos(x,y, id){
-    var radio = 100;
-    var diam = radio*2;
-    var mx = x - radio;
-    var my = y - radio/2;
-    var dosT = (diam)*(0.666);
-    var c1x = [ mx, mx+diam, mx+diam];
-    var c1y = [ my+dosT, my+dosT, my];
-    var c2x = [ mx+diam, mx, mx];
-    var c2y = [ my-dosT, my-dosT, my];
-    d = 'M ' + mx + ',' + my + ' C ';
-    d+= c1x[0] + ',' + c1y[0] + ' ';
-    d+= c1x[1] + ',' + c1y[1] + ' ';
-    d+= c1x[2] + ',' + c1y[2] + ' C ';
-    d+= c2x[0] + ',' + c2y[0] + ' ';
-    d+= c2x[1] + ',' + c2y[1] + ' ';
-    d+= c2x[2] + ',' + c2y[2] + ' ';
-    d+= 'z ';
-    document.getElementById(id).setAttribute('d', d)
-    return d;
-
-}
-
-
 function zoomEnp(idE){
     var eee = document.getElementById("map")
     var iii = document.getElementById(idE)
@@ -569,10 +490,44 @@ function zoomEnp(idE){
 }
 
 
+var game = {
+    init: function(){
+        var countriesByClassName = document.getElementsByClassName("europe");
 
-game = {
-    countriesId : ["is","pt","es","ch","at","cz","sk","be","it","by","pl","fi","de","se","no","ua","ie","gb","cy","tr","hu","lt","lv","md","bg","al","ee","fr","nl","ba","si","mk","hr","dk","me","rs","xk","gr","im","ro","ru","ad","mc","lu","li","sm","va","mt"],
-    setRandomArrayCountriesCodes: function(){
+        //Add each path country click event 
+        for(var c=0; c< countriesByClassName.length; c++){
+            countriesByClassName[c].addEventListener("click", function(e){
+                //
+                if(!clickDisabled){
+                    var currentClickId = e.path[0].id; 
+                    var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
+                    //Si se dio click en el pais indicado
+                   if( currentCountryIdQuestion == currentClickId ){
+                        console.log("True");
+                    }else{
+                        /*console.log("False");
+                        redimensiona.zoom = true;
+                        //Class mapeffect is slow effect only for automatic redimension
+                        document.getElementById("map").setAttribute("class", "mapeffect");
+                        panZoom.reset();
+                        //redimensiona.start( currentCountryIdQuestion );
+                        */
+                        game.incorrectEffect(currentCountryIdQuestion);
+                    }
+                }else {
+                    clickDisabled = false;
+                }});
+        
+        }
+
+
+
+
+        this.setRandomArrayCountriesCodes();
+        this.setQuestionInnerText();
+    }
+    ,countriesId : ["is","pt","es","ch","at","cz","sk","be","it","by","pl","fi","de","se","no","ua","ie","gb","cy","tr","hu","lt","lv","md","bg","al","ee","fr","nl","ba","si","mk","hr","dk","me","rs","xk","gr","im","ro","ru","ad","mc","lu","li","sm","va","mt"]
+    ,setRandomArrayCountriesCodes: function(){
         var totalCountries = game.countriesId.length;
         var newArrayContriesId = [];
         for(let c = 0; c < totalCountries; c ++ ){
@@ -582,73 +537,78 @@ game = {
             game.countriesId.splice(randomNum, 1);
         }
         game.countriesId = newArrayContriesId;
-    },
-    currentNumCountryQuestion : 0,
-    setQuestion : function(){
+    }
+    ,currentNumCountryQuestion : 0
+    ,languajeText: {
+        spanish: function(countryElement){ 
+                        var countryTranslate = countryElement.translations.spa ? countryElement.translations.spa.common : countryElement.name.common;
+                        return '¿Dónde se encuentra ' + countryTranslate + '?';
+                   }
+        ,english : function(countryElement){ 
+                        var countryTranslate = countryElement.name.common ? countryElement.name.common : countryElement.name.common;
+                        return 'Where is ' + countryTranslate + '?';
+                   }
+        ,french : function(countryElement){ 
+                        var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
+                        var contraction = "le ";
+                        var fl = countryTranslate[0];   //first letter
+                        if( fl == 'A' || fl == 'E' || fl == 'I' || fl == 'O' || fl == 'U'){ 
+                            contraction = "l'";
+                        }
+                        return 'Où est ' + contraction + countryTranslate + '?';
+                    }
+        ,japanese : function(countryElement){ 
+                        var countryTranslate = countryElement.translations.jpn ? countryElement.translations.jpn.common : countryElement.name.common;
+                        return countryTranslate + 'はどこですか';
+                    }
+        ,deutsh : function(countryElement){ 
+                        var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
+                        return 'Wo ist ' + countryTranslate + '?';
+                     }
+        
+    }
+    ,setQuestionInnerText : function(){
         var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
         var selectedLanguaje = document.getElementById("selectlanguaje").value;
+        var question = this.languajeText[ selectedLanguaje ](countryElement);
 
-        var question = "";
-        var countryTranslate = "";
-        
-        if( selectedLanguaje == "spanish" ){ 
-            countryTranslate = countryElement.translations.spa ? countryElement.translations.spa.common : countryElement.name.common;
-            question = '¿Dónde se encuentra ' + countryTranslate + '?';
-        }
-        else if( selectedLanguaje == "english" ){
-            countryTranslate = countryElement.name.common ? countryElement.name.common : countryElement.name.common;
-            question = 'Where is ' + countryTranslate + '?';
-        }
-        else if( selectedLanguaje == "french" ){
-            countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
-            var contraction = "le ";
-            var fl = countryTranslate[0];   //first letter
-            if( fl == 'A' || fl == 'E' || fl == 'I' || fl == 'O' || fl == 'U'){ 
-                contraction = "l'";
-            }
-            question = 'Où est ' + contraction + countryTranslate + '?';
-        }
-        else if( selectedLanguaje == "japanese" ){
-            countryTranslate = countryElement.translations.jpn ? countryElement.translations.jpn.common : countryElement.name.common;
-            question = countryTranslate + 'はどこですか';
-        }
-        else{ /*Deutch*/
-            countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
-            question = 'Wo ist ' + countryTranslate + '?';
-        }
-
-        //var question = '¿Dónde se encuentra ' + countryElement.name.common + '?';
         document.getElementById('question').innerHTML = question ;
-
-    },
-    nextQuestion: function(){
+    }
+    ,nextQuestion: function(){
         game.currentNumCountryQuestion ++;
-        game.setQuestion();
-    },
-    incorrectEffect: function(idPais){
+        game.setQuestionInnerText();
+    }
+    ,incorrectEffect: function(idPais){
+        var mapSvg = document.getElementById("map");
+        mapSvg.setAttribute("class", "mapeffect");
+        //panZoom.reset();
+        let z = 2;
+        let PAISCENTERX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
+        let PAISCENTERY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
         
-        var PAISCENTERX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
-        var PAISCENTERY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
-        var x = PAISCENTERX * panZoom.getSizes().realZoom;
-        var y = PAISCENTERY * panZoom.getSizes().realZoom;
-        var WIDTH = panZoom.getSizes().viewBox.width;
-        var HEIGHT = panZoom.getSizes().viewBox.height;
-
-
-        let lapsoX = ((WIDTH/2)-paisCenterX);
-        let lapsoY = ((HEIGHT/2)-paisCenterY);
+        panZoom.zoom(z);
         
-        let enfoqueX = (WIDTH/2) - lapsoX;
-        let enfoqueY = (HEIGHT/2) - lapsoY;
-        let panX = -1 * enfoqueX *panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
-        let panY = -1 * enfoqueY *panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
+        let panX = -1 * PAISCENTERX * panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
+        let panY = -1 * PAISCENTERY * panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
+        panZoom.pan({x: panX ,y: panY});
+        
+        setTimeout(function(){ 
+            document.getElementById( idPais ).style.fill = "#cc2a2a";
+            setTimeout(function(){
+                panZoom.reset();
+                setTimeout(function(){
+                    mapSvg.classList.remove("mapeffect");
+                    clickDisabled = false;
+                    game.nextQuestion();
+                }, 1000);
+            },
+            600);
+        }
+        ,800);
+         
 
-        panZoom.zoomAtPoint(3, {x:panX, y:panY});
-
-
-    },
-
-    setRandomCountryCode : function(){
+    }
+    ,setRandomCountryCode : function(){
         var numCountrys = this.codes.length;
         if( numCountrys > 0 ){
             var randomCodeNum = Math.floor(Math.random() * numCountrys); 
@@ -660,34 +620,34 @@ game = {
             map.clickMapObject = function(){;}
             map.balloon.enabled = true;
         }
-    },
-    numberAreas : 0,
-    numberCorrects: 0,
-    timer : "",
-    setTimer: function(){
+    }
+    ,numberAreas : 0
+    ,numberCorrects: 0
+    ,timer : ""
+    ,setTimer: function(){
         clearTimeout(this.timer);
         this.timer = setTimeout(function(){
             document.getElementById("iscorrect").className = "hidealert";
 	        map.goHome();
         }, 1500);   
-    },
-    correct: function(){
+    }
+    ,correct: function(){
         var checkElement = document.getElementById("iscorrect");
         checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'>  &#x2713; Correcto </span>";
     	checkElement.style.background = "#3630d4";
         checkElement.className = "showalert";
         this.setRandomCountryCode();
         this.setTimer();
-    },
-    inCorrect: function(){
+    }
+    ,inCorrect: function(){
         var checkElement = document.getElementById("iscorrect");
         checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'> &#x2717 Incorrecto </span>";
 	    checkElement.style.background = "#d66";
         checkElement.className = "showalert";
         this.setRandomCountryCode();
         this.setTimer();
-    },
-    changeAsk: function(){
+    }
+    ,changeAsk: function(){
 	    var spanishAreaName = map.getObjectById(game.countryCodeAsk).titleTr;
 	    if( !spanishAreaName ){
 	        spanishAreaName = map.getObjectById(game.countryCodeAsk).title;	    
@@ -695,8 +655,7 @@ game = {
         document.getElementById('question').innerHTML = '¿Dónde se encuentra '+ spanishAreaName +'?';
     }
 }
-game.setRandomArrayCountriesCodes();
-game.setQuestion();
+game.init();
 </script>
 
 </body>
