@@ -14,19 +14,24 @@
     <script src="svg-pan-zoom.js"></script>
     <script src="hammer.js"></script>
     <script src="countries.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
     <style>
     
-    #container{
+    #contenedor{
         width: 80%;
-        /*overflow: auto;*/
+        overflow: auto;
         margin: auto;
         position: relative;
         background: linear-gradient(220deg,#559, #99c,#aab,#559);
         box-shadow: 0px 5px 20px #000;
+        border-radius: 10px;
+    }
+    #container{
+        width: 100%;
+        position: relative;
         height: calc(100vh - 200px);
     }
+
     #map{
         background: transparent;/*#a9b9f0; /*#dfe9fc;*/
         height: 100%;
@@ -39,8 +44,11 @@
         display: none; 
     }
     @media only screen and (max-width: 600px) {
-        #container {
-            width: 75%;
+        #contenedor {
+            width: 95%;
+        }
+        #container{
+            height: calc(100vh - 270px);
         }
     }
     body{
@@ -57,7 +65,7 @@
         fill-opacity: 1;
     }
     path:hover, .europe:hover{
-        fill: #55a;	
+        fill: #aaaadd;	
         stroke-width: 12; 
         stroke: rgb(255, 255, 255); 
     }
@@ -93,7 +101,6 @@
         margin: 10px 0 15px 0;
     }
     #logominux{
-        position: fixed;
         top: 15px;
         left: 15px;
         background: rgba(100,100,100, 0.28);
@@ -141,11 +148,48 @@
         color: blue ;
         border: none;
     }
+    .scoreend{
+        padding: 20px;
+        text-align: center;
+        position: absolute;
+        top: 20%;
+        right: 0;
+        left: 0;
+        margin-right: auto;
+        margin-left: auto;
+        width: 200px;
+        border-radius: 10px;
+        background: #004400;
+        color: #fff;/*#aaaa00;*/
+    }
+    .selectcountry{
+        width: 20%;
+        text-align: center;
+        color: white;
+        background: #80573e;
+        padding: 8px 0;
+        border-right: solid 0.5px #5a4233;
+        font-family: sans-serif;
+        cursor: pointer;
+    }
+    .selectcountry:hover{
+        background: #a0775e;
+    }
+    .selectcountry[selected]{
+        background: transparent;
+        color: #60371e;
+        cursor: normal;
+    }
+    #gameagain{
+        border:none;background:white;color:#004400;padding:5px 15px;border-radius:10px;
+    }
     </style>
     
 </head>
-<body>
-    <div style="position:relative; width: 100vw;display: block;text-align: right; height: 1em;">
+<body id="body">
+    <div style="position:relative; width: 100vw;display: block;">
+        
+        <a href="http://minux.pw"><div id="logominux"><i class="fas fa-home"></i></div></a>
         <!--
         <div id="score" >
             <i class="fas fa-star-half-alt" style="margin: 0 5px 0 2px;"></i>
@@ -154,8 +198,8 @@
             <span class="iconScore"><i class="far fa-times-circle"></i></span> 0
         </div>
         -->
-        <div id="languaje" style="color: blue;" >
-            <select id="selectlanguaje" onchange="game.setQuestionInnerText();">
+        <div id="languaje" style="color: blue;display: inline-block; float:right;" >
+            <select id="selectlanguaje" onchange="game.setLanguajePage();">
                 <option class="opcionlang" selected value="spanish">Español</option>
                 <option class="opcionlang" value="english">English</option>
                 <option class="opcionlang" value="french">Français</option>
@@ -165,13 +209,22 @@
         </div>
 
     </div>
-    <a href="http://minux.pw"><div id="logominux"><i class="fas fa-home"></i></div></a>
     <div id="question"></div>
     <div id="iscorrect" ></div>
+    
+    <div id="contenedor">
+	    <div id="listcountries" style="width: 100%; display:flex;box-sizing: border-box;">
+            <div id="tabamerica" class="selectcountry" >América</div>
+            <div id="tabeuropa" class="selectcountry" selected>Europa</div>
+            <div id="tabasia" class="selectcountry" >Asia</div>
+            <div id="tabafrica" class="selectcountry" >Africa</div>
+            <div id="taboceania" class="selectcountry" >Oceanía</div>
+        </div>
+	    <div id="container" ></div>
+    </div>
+    <!--<button onclick="game.end();" style="background: transparent; border: none;">Show Score</button>
+    <button id="aaa" style="background: transparent; border: none;">Aaaaa</button>-->
 
-	<div id="container" ></div>
-<button onclick="panZoom.reset();">dddddd</button>
-<button onclick='document.getElementById("map").setAttribute("class", "mapeffect"); panZoom.zoomAtPoint(3, {x:400, y:485});' >eeeee</button>
 <script src="svgEuropa.js"></script>
 
 <script>
@@ -251,282 +304,55 @@ window.panZoom = svgPanZoom('#map', {
 panZoom.disableDblClickZoom();
 
 
-
-var redimensiona = {
-    values : [],
-    frames : 30,
-    initX : panZoom.getPan().x,
-    initY : panZoom.getPan().y,
-    setValues : function()  { 
-        var p = panZoom.getPan();
-        var z = panZoom.getZoom();
-        var px = p.x;
-        var py = p.y;
-        var mov = redimensiona.frames;
-        var avancePanX = (px -redimensiona.initX )/mov;
-        var avancePanY = (py -redimensiona.initY )/mov;
-        var retroZoom = (1-z)/mov;
-        
-        var cant = [];
-
-        for(var im=0; im<mov; im++){
-            px = px-avancePanX;
-            py = py-avancePanY;
-            z = z + retroZoom;
-            cant.push({x:px, y:py, z:z})
-        }
-
-        redimensiona.values = cant;
-    } ,
-    interval : 0,
-    numInterval : 0, 
-    zoom: false, 
-    start : function(idPais){ 
-        redimensiona.setValues();
-        redimensiona.interval = setInterval(function(){
-            //console.log(redimensiona.values[numInterval].z);
-            var r = redimensiona.values;
-            panZoom.zoom(r[redimensiona.numInterval].z);
-            panZoom.pan({ x: (r[redimensiona.numInterval].x), y: (r[redimensiona.numInterval].y)});
-            redimensiona.numInterval++;
-            if(redimensiona.numInterval >= (redimensiona.frames)){
-                clearInterval(redimensiona.interval)
-                redimensiona.numInterval = 0;
-                panZoom.reset();
-                if(redimensiona.zoom){
-                    acercar(idPais);
-                    redimensiona.zoom = false;
-                }
-            }
-        }, 20);
-        
-    }
-}
-az = 1;
-function acercar(idPais){
-    panZoom.reset();
-    let actualZoom = panZoom.getZoom();
-    console.log(actualZoom);
-    let progresoZoom = 1;
-    let limiteZoom = 3;
-    let z = actualZoom + progresoZoom ; //zoom por frame
-    console.log(z);
-    let divisorTiempos = 1;//(limiteZoom - z )/progresoZoom  //Math.abs((limiteZoom - z )/progresoZoom);
-    let paisCenterX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
-    let paisCenterY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
-    let x = paisCenterX*panZoom.getSizes().realZoom;
-    let y = paisCenterY*panZoom.getSizes().realZoom;
-    console.log(x,y);
-    let realX = panZoom.getSizes().viewBox.width;
-    let realY = panZoom.getSizes().viewBox.height;
-    let lapsoX = ((realX/2)-paisCenterX) / divisorTiempos;
-    let lapsoY = ((realY/2)-paisCenterY) / divisorTiempos;
-    console.log(lapsoX, lapsoY);
-    let lapsoNum = 1;
-   // let frames = setInterval( function(){ 
-        panZoom.zoom(z);
-        let enfoqueX = (realX/2) - ( lapsoNum * lapsoX);
-        let enfoqueY = (realY/2) - ( lapsoNum * lapsoY);
-        let panX = -1 * enfoqueX *panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
-        let panY = -1 * enfoqueY *panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
-        panZoom.pan({x: panX ,y: panY});
-        //panZoom.zoomAtPoint(z, {x:x,y:y});        
-        z+= progresoZoom ;
-
-        lapsoNum++;
-
-        //console.log(panX, panY);
-        if( z > limiteZoom){
-            clearInterval(frames)       
-            document.getElementById( idPais ).style.fill = "#cc4444" 
-            setTimeout(function(){ panZoom.reset(); },600);
-        }
-   // }, 50 )
-}
-
-function convertRealScaleToView(){
-        
-}
-
-
-var zoomSlow = {
-    frames         : undefined
-    ,setThisValues : function(){
-        this.actualZoom     = panZoom.getZoom();
-        this.zoomPara3      = 3 - this.actualZoom;
-        this.aumentoZoom    = (this.zoomPara3/Math.abs(this.zoomPara3))*0.6;
-        this.numFrames      = Math.abs(this.zoomPara3/0.6);
-        this.frameZoom      = 1;
-        this.framesZoom     = undefined;
-        /////
-        this.divisorTiempos = 20;
-        this.PAISCENTERX    = 4250 - (panZoom.getSizes().width/2  / panZoom.getSizes().realZoom);
-        this.PAISCENTERY    = 7000 - (panZoom.getSizes().height/2 / panZoom.getSizes().realZoom);
-        this.ORIGINX        = panZoom.getPan().x / panZoom.getSizes().realZoom * -1;
-        this.ORIGINY        = panZoom.getPan().y / panZoom.getSizes().realZoom * -1;
-        this.LAPSOX         = (this.ORIGINX-this.PAISCENTERX) / this.divisorTiempos;
-        this.LAPSOY         = (this.ORIGINY-this.PAISCENTERY) / this.divisorTiempos;
-        this.lapsoNum       = 1;
-    }
-    ,startPan : function(){
-        zoomSlow.setThisValues();
-        zoomSlow.frames = setInterval( function(){ 
-            let ENFOQUEX = zoomSlow.ORIGINX - ( zoomSlow.lapsoNum * zoomSlow.LAPSOX);
-            let ENFOQUEY = zoomSlow.ORIGINY - ( zoomSlow.lapsoNum * zoomSlow.LAPSOY);
-            let panX = -1 * ENFOQUEX * panZoom.getSizes().realZoom ;
-            let panY = -1 * ENFOQUEY * panZoom.getSizes().realZoom ;
-            panZoom.pan({x: panX, y: panY });
-    
-            zoomSlow.lapsoNum++;
-    
-            //console.log(ENFOQUEX, this.ORIGINX, panX, panY);
-            if( zoomSlow.lapsoNum>zoomSlow.divisorTiempos){
-                clearInterval(zoomSlow.frames)        
-            }
-        }, 50 )       
-    }
-    ,startZoom : function(){
-        zoomSlow.setThisValues();
-        this.framesZoom = setInterval(function(){
-            if(zoomSlow.frameZoom > zoomSlow.numFrames){
-                clearInterval(zoomSlow.framesZoom);
-                zoomSlow.frameZoom = 0;
-                zoomSlow.startPan();
+function clickCountry(e){
+   //
+   if(!clickDisabled){
+        if(game.avalibleAnswer){
+            var currentClickId = e.path[0].id; 
+            var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
+            //Si se dio click en el pais indicado
+            if( currentCountryIdQuestion == currentClickId ){
+                console.log("True");
+                game.correct( currentClickId );
             }else{
-                let zoom =  zoomSlow.actualZoom + (zoomSlow.aumentoZoom*zoomSlow.frameZoom);
-                console.log(  zoom )
-                panZoom.zoom( zoom )
-                zoomSlow.frameZoom ++;
+                /*console.log("False");
+                redimensiona.zoom = true;
+                //Class mapeffect is slow effect only for automatic redimension
+                document.getElementById("map").setAttribute("class", "mapeffect");
+                panZoom.reset();
+                //redimensiona.start( currentCountryIdQuestion );
+                */
+                game.incorrect(currentCountryIdQuestion);
             }
-        }, 100)
-    }
-};
-zoomSlow.setThisValues();
-
-
-var acerca = {
-    values : [],
-    frames : 30,
-    initX : panZoom.getPan().x,
-    initY : panZoom.getPan().y,
-    setValues : function()  { 
-        var p = panZoom.getPan();
-        var z = panZoom.getZoom();
-        var px = p.x;
-        var py = p.y;
-        var mov = acerca.frames;
-        var avancePanX = (px -acerca.initX )/mov;
-        var avancePanY = (py -acerca.initY )/mov;
-        var retroZoom = (1-z)/mov;
-        
-        var cant = [];
-
-        for(var im=0; im<mov; im++){
-            px = px-avancePanX;
-            py = py-avancePanY;
-            z = z + retroZoom;
-            cant.push({x:px, y:py, z:z})
         }
-
-        acerca.values = cant;
-    } ,
-    interval : 0,
-    numInterval : 0,  
-    start : function(){ 
-        acerca.setValues();
-        acerca.interval = setInterval(function(){
-            var r = acerca.values;
-            panZoom.zoom(r[acerca.numInterval].z);
-            panZoom.pan({ x: (r[acerca.numInterval].x), y: (r[acerca.numInterval].y)});
-            acerca.numInterval++;
-            if(acerca.numInterval >= (acerca.frames)){
-                
-                panZoom.reset();
-            }else if(acerca.numInterval >= (acerca.frames*2)){
-                clearInterval(acerca.interval)
-                acerca.numInterval = 0;
-                panZoom.reset();
-            }
-
-        }, 20);
-        
-    }
-}
-
-
-function zoomEnp(idE){
-    var eee = document.getElementById("map")
-    var iii = document.getElementById(idE)
-
-    elem = iii;
-    var position = $(elem).offset();
-    var parentOffset = $("#map").offset();
-    
-    position.top -= parentOffset.top;
-    position.left -= parentOffset.left;
-    
-    {
-      let width = $("#map").width();
-      let height = $("#map").height();
-      let xx = width/2 - position.left;
-      let yy = height/2 - position.top ;
-
-    
-      //document.getElementById('map').querySelector('rect').setAttribute('width', 12386.153)
-      
-      var svgns = "http://www.w3.org/2000/svg";
-      var circle = document.createElementNS(svgns, 'circle');
-      circle.setAttributeNS(null, 'cx', xx);
-      circle.setAttributeNS(null, 'cy', yy);
-      circle.setAttributeNS(null, 'r', 5);
-      //circle.setAttribute( 'height', '150');
-      //circle.setAttribute( 'width', '150');
-      circle.setAttribute( 'fill', 'red');
-      document.getElementById('map').appendChild(circle); 
-      //console.log(circle);
-      //this.panZoom.panBy({x: xx, y: yy });
-    }        
-        
+   }else {
+       clickDisabled = false;
+   }
 }
 
 
 var game = {
     init: function(){
         var countriesByClassName = document.getElementsByClassName("europe");
+        
+        if(document.cookie != ""){
+            var langCookie = document.cookie;
+            var lang = langCookie.split('=')
+            document.getElementById("selectlanguaje").value = lang[1];
+        }
+        this.setLanguajePage();
 
         //Add each path country click event 
         for(var c=0; c< countriesByClassName.length; c++){
-            countriesByClassName[c].addEventListener("click", function(e){
-                //
-                if(!clickDisabled){
-                    var currentClickId = e.path[0].id; 
-                    var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
-                    //Si se dio click en el pais indicado
-                   if( currentCountryIdQuestion == currentClickId ){
-                        console.log("True");
-                    }else{
-                        /*console.log("False");
-                        redimensiona.zoom = true;
-                        //Class mapeffect is slow effect only for automatic redimension
-                        document.getElementById("map").setAttribute("class", "mapeffect");
-                        panZoom.reset();
-                        //redimensiona.start( currentCountryIdQuestion );
-                        */
-                        game.incorrectEffect(currentCountryIdQuestion);
-                    }
-                }else {
-                    clickDisabled = false;
-                }});
-        
+            countriesByClassName[c].addEventListener("click", clickCountry);        
         }
 
-
-
-
+        this.numOfCountries = countriesByClassName.length;
         this.setRandomArrayCountriesCodes();
-        this.setQuestionInnerText();
+        this.setQuestion();
     }
     ,countriesId : ["is","pt","es","ch","at","cz","sk","be","it","by","pl","fi","de","se","no","ua","ie","gb","cy","tr","hu","lt","lv","md","bg","al","ee","fr","nl","ba","si","mk","hr","dk","me","rs","xk","gr","im","ro","ru","ad","mc","lu","li","sm","va","mt"]
+    ,numOfCountries : 0
     ,setRandomArrayCountriesCodes: function(){
         var totalCountries = game.countriesId.length;
         var newArrayContriesId = [];
@@ -538,17 +364,22 @@ var game = {
         }
         game.countriesId = newArrayContriesId;
     }
+    ,avalibleAnswer: true
     ,currentNumCountryQuestion : 0
-    ,languajeText: {
-        spanish: function(countryElement){ 
+    ,textsIdioms : []
+    ,getQuestion: {
+        spanish: function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
                         var countryTranslate = countryElement.translations.spa ? countryElement.translations.spa.common : countryElement.name.common;
                         return '¿Dónde se encuentra ' + countryTranslate + '?';
                    }
-        ,english : function(countryElement){ 
+        ,english : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
                         var countryTranslate = countryElement.name.common ? countryElement.name.common : countryElement.name.common;
                         return 'Where is ' + countryTranslate + '?';
                    }
-        ,french : function(countryElement){ 
+        ,french : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
                         var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
                         var contraction = "le ";
                         var fl = countryTranslate[0];   //first letter
@@ -557,48 +388,64 @@ var game = {
                         }
                         return 'Où est ' + contraction + countryTranslate + '?';
                     }
-        ,japanese : function(countryElement){ 
+        ,japanese : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
                         var countryTranslate = countryElement.translations.jpn ? countryElement.translations.jpn.common : countryElement.name.common;
                         return countryTranslate + 'はどこですか';
                     }
-        ,deutsh : function(countryElement){ 
+        ,deutsh : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
                         var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
                         return 'Wo ist ' + countryTranslate + '?';
                      }
         
     }
-    ,setQuestionInnerText : function(){
-        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
-        var selectedLanguaje = document.getElementById("selectlanguaje").value;
-        var question = this.languajeText[ selectedLanguaje ](countryElement);
-
-        document.getElementById('question').innerHTML = question ;
+    ,setQuestion: function(){
+        if(game.currentNumCountryQuestion>= game.numOfCountries){
+            game.end();
+        }else{
+            var selectedLanguaje = document.getElementById("selectlanguaje").value;
+            var question = this.getQuestion[ selectedLanguaje ]();
+            
+            document.getElementById('question').innerHTML = question;
+        }
     }
     ,nextQuestion: function(){
         game.currentNumCountryQuestion ++;
-        game.setQuestionInnerText();
+        game.setQuestion();
     }
-    ,incorrectEffect: function(idPais){
+    ,numOfCorrects: 0
+    ,numOfIncorrects: 0
+    ,incorrect: function(idPais){
         var mapSvg = document.getElementById("map");
+        clickDisabled = true;
+        game.avalibleAnswer = false;
+        //Se agrega y elimina esta clase para el svg que contiene una transicion para el zoom (transform : matrix...))
         mapSvg.setAttribute("class", "mapeffect");
         //panZoom.reset();
-        let z = 2;
         let PAISCENTERX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
         let PAISCENTERY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
         
-        panZoom.zoom(z);
+        panZoom.zoom( 3 );
+
+        game.numOfIncorrects++;
         
         let panX = -1 * PAISCENTERX * panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
         let panY = -1 * PAISCENTERY * panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
         panZoom.pan({x: panX ,y: panY});
+
+        var countryElement = document.getElementById( idPais );
         
+        //Ajustar para que coincida con el tiempo del efecto CSS
         setTimeout(function(){ 
-            document.getElementById( idPais ).style.fill = "#cc2a2a";
+            countryElement.style.fill = "#cc2a2a";
+            countryElement.removeEventListener("click", clickCountry);
             setTimeout(function(){
                 panZoom.reset();
                 setTimeout(function(){
                     mapSvg.classList.remove("mapeffect");
                     clickDisabled = false;
+                    game.avalibleAnswer = true;
                     game.nextQuestion();
                 }, 1000);
             },
@@ -608,21 +455,64 @@ var game = {
          
 
     }
-    ,setRandomCountryCode : function(){
-        var numCountrys = this.codes.length;
-        if( numCountrys > 0 ){
-            var randomCodeNum = Math.floor(Math.random() * numCountrys); 
-            game.countryCodeAsk = game.codes[randomCodeNum];
-            this.codes.splice(randomCodeNum, 1);
-            this.changeAsk();
-        }else{
-            document.getElementById('question').innerHTML = "Correctos " + game.numberCorrects +" de "+ game.numberAreas +" paises";
-            map.clickMapObject = function(){;}
-            map.balloon.enabled = true;
-        }
+    ,correct: function(idPais){
+        var countryElement = document.getElementById( idPais );
+        clickDisabled = false;
+        game.numOfCorrects++;
+        countryElement.style.fill = "#2a2acc";
+        countryElement.removeEventListener("click", clickCountry);
+        game.nextQuestion();
     }
-    ,numberAreas : 0
-    ,numberCorrects: 0
+    ,end: function(){
+        //var element = '<i class="fab fa-fort-awesome-alt" style="font-size:2em;"></i><br><br><i class="fas fa-check"></i><span style="margin: 0 0 0 15px;"> ' + game.numOfCorrects + '</span> <span style="margin: 0 20px;">|</span> <i class="fas fa-times"></i><span style="margin: 0 0 0 15px;">  ' + game.numOfIncorrects + '</span>';
+        var div = document.createElement('div');
+        div.setAttribute("class","scoreend");
+        div.innerHTML = '<i class="fab fa-fort-awesome-alt" style="font-size:3em;"></i><br><br>' +
+                      '<span style="font-size:2em;"><i class="fas fa-star-half-alt"></i>' +
+                      '<span style="margin-left:20px;">'+ ((game.numOfCorrects/game.numOfCountries).toFixed(2)*100) +'%</span></span>'+
+                      '<br><br><button id="gameagain" onclick="location.reload();">'+ game.textsIdioms[6] +'</button>';
+
+        document.getElementById('body').appendChild(div);
+    }
+    ,setTextsLanguaje : {
+        spanish: function(){ 
+                        var question = game.getQuestion[ 'spanish' ]();
+                        document.cookie = "languajemap=spanish";
+                        game.textsIdioms = [question, 'América','Europa','Asia','África','Oceanía','Jugar otra vez'];
+                   }
+        ,english : function(){ 
+                        var question = game.getQuestion[ 'english' ]();
+                        document.cookie = "languajemap=english";
+                        game.textsIdioms = [question,'America', 'Europe', 'Asia', 'Africa', 'Oceania','Play again']
+                   }
+        ,french : function(){ 
+                        var question = game.getQuestion[ 'french' ]();
+                        document.cookie = "languajemap=french";
+                        game.textsIdioms = [question,'Amérique', 'Europe', 'Asie', 'Afrique', 'Océanie','Rejouer'];
+                    }
+        ,japanese : function(){ 
+                        var question = game.getQuestion[ 'japanese' ]();
+                        document.cookie = "languajemap=japanese";
+                        game.textsIdioms = [question,'アメリカ','ヨーロッパ','アジア','アフリカ','オセアニア','もう一度遊ぶ'];
+                    }
+        ,deutsh : function(){
+                        var question = game.getQuestion[ 'deutsh' ]();
+                        document.cookie = "languajemap=deutsh";
+                        game.textsIdioms = [question,'Amerika', 'Europa', 'Asien', 'Afrika', 'Ozeanien','Spiel nochmal'];
+                     }
+    }
+    ,setLanguajePage: function(){
+        var selectedLanguaje = document.getElementById("selectlanguaje").value;
+        game.setTextsLanguaje[selectedLanguaje]();
+
+        document.getElementById('question').innerHTML =   game.textsIdioms[0];
+        document.getElementById('tabamerica').innerHTML = game.textsIdioms[1];
+        document.getElementById('tabeuropa').innerHTML =  game.textsIdioms[2];
+        document.getElementById('tabasia').innerHTML =    game.textsIdioms[3];
+        document.getElementById('tabafrica').innerHTML =  game.textsIdioms[4];
+        document.getElementById('taboceania').innerHTML = game.textsIdioms[5];
+    }
+    /*
     ,timer : ""
     ,setTimer: function(){
         clearTimeout(this.timer);
@@ -647,15 +537,11 @@ var game = {
         this.setRandomCountryCode();
         this.setTimer();
     }
-    ,changeAsk: function(){
-	    var spanishAreaName = map.getObjectById(game.countryCodeAsk).titleTr;
-	    if( !spanishAreaName ){
-	        spanishAreaName = map.getObjectById(game.countryCodeAsk).title;	    
-	    }
-        document.getElementById('question').innerHTML = '¿Dónde se encuentra '+ spanishAreaName +'?';
-    }
+    */
 }
 game.init();
+//Se tiene que dar doble click cuando se arrastra o da zoom
+
 </script>
 
 </body>

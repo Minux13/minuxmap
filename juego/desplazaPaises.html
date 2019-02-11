@@ -139,31 +139,117 @@
 
 <script>
 
-var countriesByClassName = document.getElementsByClassName("europe");
 
-function paisACirculo(x,y, id){
-    var radio = 100;
-    var diam = radio*2;
-    var mx = x - radio;
-    var my = y - radio/2;
-    var dosT = (diam)*(0.666);
-    var c1x = [ mx, mx+diam, mx+diam];
-    var c1y = [ my+dosT, my+dosT, my];
-    var c2x = [ mx+diam, mx, mx];
-    var c2y = [ my-dosT, my-dosT, my];
-    d = 'M ' + mx + ',' + my + ' C ';
-    d+= c1x[0] + ',' + c1y[0] + ' ';
-    d+= c1x[1] + ',' + c1y[1] + ' ';
-    d+= c1x[2] + ',' + c1y[2] + ' C ';
-    d+= c2x[0] + ',' + c2y[0] + ' ';
-    d+= c2x[1] + ',' + c2y[1] + ' ';
-    d+= c2x[2] + ',' + c2y[2] + ' ';
-    d+= 'z ';
-    document.getElementById(id).setAttribute('d', d)
-    return d;
+function stringToFloat(coordenates){
+    path=[];
+    for(let i=0; i<coordenates.length; i++){
+        let point = coordenates[i];
+        let coordenateObject = {p: point[0], x: [], y: []}
+        for(let j=1; j<point.length -1; j++){
+            coordenateObject.x.push(parseFloat(point[j][0]));
+            coordenateObject.y.push(parseFloat(point[j][1]));
+        }
+        path.push(coordenateObject);
+    }
+    return path;
+}
+
+function restaPosicion(arrayPoints){
+    
+    var coordenates = []
+    for(let i=0; i<arrayPoints.length; i++){    
+        let oneCoordenate = arrayPoints[i].split(" ");
+        let oneCoordenateArray = [];
+        for(let j=0; j<oneCoordenate.length; j++){
+            oneCoordenateArray.push( oneCoordenate[j].split(",") );
+        }
+        coordenates.push(oneCoordenateArray);
+    }
+    return stringToFloat(coordenates);
+}
+
+function getArrayPositions(pais){
+    var d = document.getElementById(pais).getAttribute("d")
+    var points = [];
+    
+    var point = "";
+    for(let i=0; i<d.length; i++){
+        
+        if( d[i] == 'M' || d[i] == 'C' || d[i] == 'L' || d[i] == 'H' || d[i] == 'V' || d[i] == 'S' || d[i] == 'Q' || d[i] == 'T' || d[i] == 'A' || d[i] == 'Z'
+        || d[i] == 'm' || d[i] == 'c' || d[i] == 'l' || d[i] == 'h' || d[i] == 'v' || d[i] == 's' || d[i] == 'q' || d[i] == 't' || d[i] == 'a' || d[i] == 'z' ){
+            points.push(point)
+            point = "";            
+       }
+
+       point += d[i];
+
+    }
+    return restaPosicion(points)
+}
+
+
+//Desplaza por cada pais
+function moveCountry(Xpx, Ypx, pais){
+    var pathO = getArrayPositions(pais);
+    var str = "";
+    for(let i=1; i<pathO.length; i++){
+        str += pathO[i].p;
+        str += " ";
+        for(let j=0; j<pathO[i].x.length; j++){
+            let x = pathO[i].x[j] + Xpx;
+            let y = pathO[i].y[j] + Ypx;
+            str += x + "," + y + " "
+        }
+    }
+    str += "z ";
+    var thisCountry = document.getElementById(pais);
+    thisCountry.setAttribute("d", str);
+    thisCountry.setAttribute("centerx", parseFloat( thisCountry.getAttribute("centerx") ) + Xpx );
+    thisCountry.setAttribute("centery", parseFloat( thisCountry.getAttribute("centery") ) + Ypx );
+    thisCountry.setAttribute("minx", parseFloat( thisCountry.getAttribute("minx") ) + Xpx );
+    thisCountry.setAttribute("miny", parseFloat( thisCountry.getAttribute("miny") ) + Ypx );
+    thisCountry.setAttribute("maxx", parseFloat( thisCountry.getAttribute("maxx") ) + Xpx );
+    thisCountry.setAttribute("maxy", parseFloat( thisCountry.getAttribute("maxy") ) + Ypx );
 
 }
 
+//Desplaza por cada pais
+function redCountry(Xpx, Ypx, pais){
+    var pathO = getArrayPositions(pais);
+    var str = "";
+    for(let i=1; i<pathO.length; i++){
+        str += pathO[i].p;
+        str += " ";
+        for(let j=0; j<pathO[i].x.length; j++){
+            let x = pathO[i].x[j] * Xpx;
+            let y = pathO[i].y[j] * Ypx;
+            str += x + "," + y + " "
+        }
+    }
+    str += "z ";
+    var thisCountry = document.getElementById(pais);
+    thisCountry.setAttribute("d", str);
+}
+
+function moveAll(xPx, yPx){
+    var countriesByClassName = document.getElementsByClassName("europe");
+
+    for(var c=0; c< countriesByClassName.length; c++){
+        var id = countriesByClassName[c].id;
+        moveCountry( xPx, yPx, id );
+    }
+        
+}
+
+function redAll(xPx, yPx){
+    var countriesByClassName = document.getElementsByClassName("europe");
+
+    for(var c=0; c< countriesByClassName.length; c++){
+        var id = countriesByClassName[c].id;
+        redCountry( xPx, yPx, id );
+    }
+        
+}
 
 
 
