@@ -132,8 +132,9 @@ function getArrayPositions(pais){
     }
     return restaPosicion(points)
 }
-//var pathO = getArrayPositions("de");
 
+
+//Desplaza por cada pais
 function moveVertical(Xpx, Ypx, pais){
     var pathO = getArrayPositions(pais);
     var str = "";
@@ -147,7 +148,16 @@ function moveVertical(Xpx, Ypx, pais){
         }
     }
     str += "z ";
-    document.getElementById(pais).setAttribute("d", str)
+    var thisCountry = document.getElementById(pais);
+    thisCountry.setAttribute("d", str);
+   ;
+    thisCountry.setAttribute("centerx", parseFloat( thisCountry.getAttribute("centerx") ) + Xpx );
+    thisCountry.setAttribute("centery", parseFloat( thisCountry.getAttribute("centery") ) + Ypx ));
+    thisCountry.setAttribute("minx", parseFloat( thisCountry.getAttribute("minx") ) + Xpx ));
+    thisCountry.setAttribute("miny", parseFloat( thisCountry.getAttribute("miny") ) + Ypx ));
+    thisCountry.setAttribute("maxx", parseFloat( thisCountry.getAttribute("maxx") ) + Xpx ));
+    thisCountry.setAttribute("maxy", parseFloat( thisCountry.getAttribute("maxy") ) + Ypx ));
+
 }
 
 function moveAll(xPx, yPx){
