@@ -58,15 +58,15 @@
         margin: 0px;
     }
     
-    path, .europe{
+    path, .countries{
         fill: green; /*#a0b0e0;*/
         stroke: #c0d2f0; 
-        stroke-width: 6; 
+        stroke-width: 3; 
         fill-opacity: 1;
     }
-    path:hover, .europe:hover{
+    path:hover, .countries:hover{
         fill: #aaaadd;	
-        stroke-width: 12; 
+        stroke-width: 6; 
         stroke: rgb(255, 255, 255); 
     }
     #mx-tooltip {
@@ -225,7 +225,7 @@
     <!--<button onclick="game.end();" style="background: transparent; border: none;">Show Score</button>
     <button id="aaa" style="background: transparent; border: none;">Aaaaa</button>-->
 
-<script src="svgEuropa.js"></script>
+<script src="svgContinent.js"></script>
 
 <script>
 
@@ -360,10 +360,7 @@ function getArrayPositions(d){
 allsrt = "";
 
 function unePaths(idC){
-    var c = document.getElementById(idC);
-    //console.log(c);
-    miny = 4310;
-    var paths = c.getElementsByTagName("path");
+    var paths = document.querySelectorAll("[idc="+ idC +"]");
     var str = '<path id="' + idC + '" d="';
     //Cada path
     for(var c=0; c< paths.length; c++){
@@ -378,7 +375,7 @@ function unePaths(idC){
             str1 = p.p[0] == "" ? '' : p.p[0] + ' ';
             //Forma un str del trazo M C L
             for(var j=0;j<p.x.length;j++){
-                if(p.y[j]<miny){miny=p.y[j]}
+                //if(p.y[j]<miny){miny=p.y[j]}
                 str1 += parseInt(p.x[j]) +','+ parseInt(p.y[j]) + ' ';
             }
             trazos += str1;
@@ -417,68 +414,43 @@ function redondeaPaths(idC){
     console.log(str);
 }
 
-function reduceTodos(){
-    c=document.getElementsByClassName("cambiar");
-    for(i=0;i<c.length;i++){
-    	unePaths(c[i].id)
-    }
-}
 
-var game = {
-    init: function(){
-        var countriesByClassName = document.getElementsByTagName("path");
 
-        //Add each path country click event 
-        for(var c=0; c< countriesByClassName.length; c++){
-            countriesByClassName[c].addEventListener("click", function(e){
-                var elem = e.path[0] ;
-                elem.style.fill = "blue";
-                game.countriesId.push( e.path[0].id );
-                console.log(elem.id);
-            });        
-        }
 
-    }
-    ,countriesId : []
-    ,numOfCountries : 0
-    ,avalibleAnswer: true
-    ,currentNumCountryQuestion : 0
-    ,textsIdioms : []
-    ,getQuestion: {
-        spanish: function(){ 
-                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
-                        var countryTranslate = countryElement.translations.spa ? countryElement.translations.spa.common : countryElement.name.common;
-                        return '¿Dónde se encuentra ' + countryTranslate + '?';
-                   }
-        ,english : function(){ 
-                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
-                        var countryTranslate = countryElement.name.common ? countryElement.name.common : countryElement.name.common;
-                        return 'Where is ' + countryTranslate + '?';
-                   }
-        ,french : function(){ 
-                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
-                        var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
-                        var contraction = "le ";
-                        var fl = countryTranslate[0];   //first letter
-                        if( fl == 'A' || fl == 'E' || fl == 'I' || fl == 'O' || fl == 'U'){ 
-                            contraction = "l'";
-                        }
-                        return 'Où est ' + contraction + countryTranslate + '?';
-                    }
-        ,japanese : function(){ 
-                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
-                        var countryTranslate = countryElement.translations.jpn ? countryElement.translations.jpn.common : countryElement.name.common;
-                        return countryTranslate + 'はどこですか';
-                    }
-        ,deutsh : function(){ 
-                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
-                        var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
-                        return 'Wo ist ' + countryTranslate + '?';
-                     }
+function moveAllaaaaa(xPx, yPx){
+    var countriesByClassName = document.getElementsByTagName('path');
+    
+    for(var c=0; c< countriesByClassName.length; c++){
         
+        var elem = countriesByClassName[c];
+        var idc = elem.getAttribute("idc");
+        elem.setAttribute
+    }
+        
+}
+
+
+var arrIds = '';
+//Une todos y agrega Id por attr  idc;
+function getTodosIdc(){
+    ap = document.getElementsByTagName("path");
+    ar=[];
+    for(let i=0;i<ap.length;i++ ){
+    	ar[ap[i].getAttribute('idc')] = 0;
+    }
+
+    for(a in ar){
+        unePaths(a);
     }
 }
-game.init();
+
+
+
+
+
+
+
+
 
 </script>
 

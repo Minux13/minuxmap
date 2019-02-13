@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<title>Adivina el país</title>
+ 
+		<link rel="stylesheet" href="countries.css" type="text/css">
+    
+   <script src="countries.js"></script>
+
+<style>
+
+</style>
+<script src="countries.js"></script>
+<script>
+var mxCountries = [];
+</script>
+
+	</head>
+	<body>
+    
+    <button onclick="paises.push(paisPuntoActual)">Guarda paises </button>
+
+        <div id="ask">aa</div>
+        <div id="iscorrect" ></div>
+        
+	<div id="container" ></div>
+    
+    <div id="score" ></div>
+
+<script src="svgContinent.js"></script>
+
+<script>
+
+
+function stringToFloat(coordenates){
+    path=[];
+    for(let i=0; i<coordenates.length; i++){
+        let point = coordenates[i];
+        let coordenateObject = {p: point[0], x: [], y: []}
+        for(let j=1; j<point.length -1; j++){
+            coordenateObject.x.push(parseFloat(point[j][0]));
+            coordenateObject.y.push(parseFloat(point[j][1]));
+        }
+        path.push(coordenateObject);
+    }
+    return path;
+}
+
+function restaPosicion(arrayPoints){
+    
+    var coordenates = []
+    for(let i=0; i<arrayPoints.length; i++){    
+        let oneCoordenate = arrayPoints[i].split(" ");
+        let oneCoordenateArray = [];
+        for(let j=0; j<oneCoordenate.length; j++){
+            oneCoordenateArray.push( oneCoordenate[j].split(",") );
+        }
+        coordenates.push(oneCoordenateArray);
+    }
+    return stringToFloat(coordenates);
+}
+
+function getArrayPositions(pais){
+    var d = document.getElementById(pais).getAttribute("d")
+    var points = [];
+    
+    var point = "";
+    for(let i=0; i<d.length; i++){
+        
+        if( d[i] == 'M' || d[i] == 'C' || d[i] == 'L' || d[i] == 'H' || d[i] == 'V' || d[i] == 'S' || d[i] == 'Q' || d[i] == 'T' || d[i] == 'A' || d[i] == 'Z'
+        || d[i] == 'm' || d[i] == 'c' || d[i] == 'l' || d[i] == 'h' || d[i] == 'v' || d[i] == 's' || d[i] == 'q' || d[i] == 't' || d[i] == 'a' || d[i] == 'z' ){
+            points.push(point)
+            point = "";            
+       }
+
+       point += d[i];
+
+    }
+    return restaPosicion(points)
+}
+
+
+
+//Manualmente establece los atributos x y y centro
+function setAttrHandly(pais, xx, yy){
+    var pathO = getArrayPositions(pais);
+    var minx =  pathO[1].x[0];
+    var miny =  pathO[1].y[0];
+    var maxx =  pathO[1].x[0];
+    var maxy =  pathO[1].y[0];
+
+    //Toma cada M C L...
+    for(let i=1; i<pathO.length; i++){
+        //Desgloza cada coordenada x-y del M C L
+        for(let j=0; j<pathO[i].x.length; j++){
+            let x = pathO[i].x[j];
+            let y = pathO[i].y[j];
+
+            if( x < minx ) { minx = x; }
+            if( x > maxx ) { maxx = x; }
+            if( y < miny ) { miny = y; }
+            if( y > maxy ) { maxy = y; }
+
+        }
+    }
+
+    document.getElementById(pais).setAttribute("minx",   minx + xx)
+    document.getElementById(pais).setAttribute("maxx",   maxx + xx)
+    document.getElementById(pais).setAttribute("miny",   miny + yy)
+    document.getElementById(pais).setAttribute("maxy",   maxy + yy)
+    document.getElementById(pais).setAttribute("centerx", (maxx+minx)/2 + xx )
+    document.getElementById(pais).setAttribute("centery", (maxy+miny)/2 + yy)
+    
+    //document.getElementById("centerprueba").setAttribute("cx", (maxx+minx)/2 )
+    //document.getElementById("centerprueba").setAttribute("cy", (maxy+miny)/2 )
+    document.getElementById("ask").innerHTML = minux_countries_codes[pais].translations.spa.common;
+    puntoRojo(pais, pais)
+}
+
+
+//Define los atributos min max y centro de x y y por id del pais parametro
+function setAttr(pais){
+    var pathO = getArrayPositions(pais);
+    var minx =  pathO[1].x[0];
+    var miny =  pathO[1].y[0];
+    var maxx =  pathO[1].x[0];
+    var maxy =  pathO[1].y[0];
+
+    //Toma cada M C L...
+    for(let i=1; i<pathO.length; i++){
+        //Desgloza cada coordenada x-y del M C L
+        for(let j=0; j<pathO[i].x.length; j++){
+            let x = pathO[i].x[j];
+            let y = pathO[i].y[j];
+
+            if( x < minx ) { minx = x; }
+            if( x > maxx ) { maxx = x; }
+            if( y < miny ) { miny = y; }
+            if( y > maxy ) { maxy = y; }
+
+        }
+    }
+    document.getElementById(pais).setAttribute("minx",   minx)
+    document.getElementById(pais).setAttribute("maxx",   maxx)
+    document.getElementById(pais).setAttribute("miny",   miny)
+    document.getElementById(pais).setAttribute("maxy",   maxy)
+    document.getElementById(pais).setAttribute("centerx", (maxx+minx)/2 )
+    document.getElementById(pais).setAttribute("centery", (maxy+miny)/2 )
+    
+    //document.getElementById("centerprueba").setAttribute("cx", (maxx+minx)/2 )
+    //document.getElementById("centerprueba").setAttribute("cy", (maxy+miny)/2 )
+    //document.getElementById("ask").innerHTML = minux_countries_codes[pais].name.common;
+}
+
+
+//Llama a la funcion que establece los atributos, toma todos los elementos con la clase "countries"
+//Se obtienen guardando la página desde el navegador para copiarlos
+function setAttrAllCountries(){
+    var countriesByClassName = document.getElementsByClassName("countries");
+
+    for(var c=0; c< countriesByClassName.length; c++){
+        var id = countriesByClassName[c].id;
+        setAttr( id );
+    }
+        
+}
+setAttrAllCountries();
+
+
+var countriesByClassName = document.getElementsByClassName("countries");
+var c = 1;
+
+paises = [];
+paisPuntoActual = ""
+//Marca un punto rojo por id del pais para comprobar el centro
+//debe de haber en el svg un <circle id="centerprueba" cx="8800" cy="500" r="100" fill="red">
+function puntoRojo(id, idAnterior){
+    var paisId = id ? id : countriesByClassName[c].id
+    try{paisPuntoActual = minux_countries_codes[paisId].translations.spa.common + " " + paisId;}catch(e){console.log(e);}
+    //var elementCountryById = countriesByClassName[c];
+    var elementCountryById = document.getElementById(id );
+    document.getElementById(idAnterior).style.fill = "black";
+    elementCountryById.style.fill = "blue";
+    document.getElementById("centerprueba").setAttribute("cx", elementCountryById.getAttribute("centerx") );
+    document.getElementById("centerprueba").setAttribute("cy", elementCountryById.getAttribute("centery") );
+    c++;
+}
+
+function puntoRojoTodosLosPaisesAutomatico(){
+     setInterval(function(){ 
+         var code = countriesByClassName[c].id;
+         var codeAnterior = c==0 ? countriesByClassName[c].id : countriesByClassName[c-1].id ;
+         puntoRojo(code, codeAnterior); 
+     }, 2000)
+}
+
+str="";
+for( a = 0; a<countriesByClassName.length; a++ ){
+    str+="'"+countriesByClassName[a].id+"',"
+}
+
+
+//var inte = setInterval(puntoRojo, 3000);
+
+</script>
+
+	</body>
+</html>

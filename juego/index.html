@@ -58,13 +58,13 @@
         margin: 0px;
     }
     
-    path, .europe{
+    path, .countries{
         fill: green; /*#a0b0e0;*/
         stroke: #c0d2f0; 
         stroke-width: 6; 
         fill-opacity: 1;
     }
-    path:hover, .europe:hover{
+    path:hover, .countries:hover{
         fill: #aaaadd;	
         stroke-width: 12; 
         stroke: rgb(255, 255, 255); 
@@ -166,7 +166,7 @@
         width: 20%;
         text-align: center;
         color: white;
-        background: #80573e;
+        background: linear-gradient(0deg,#8f684d,#764c34,#60401e);
         padding: 8px 0;
         border-right: solid 0.5px #5a4233;
         font-family: sans-serif;
@@ -225,7 +225,7 @@
     <!--<button onclick="game.end();" style="background: transparent; border: none;">Show Score</button>
     <button id="aaa" style="background: transparent; border: none;">Aaaaa</button>-->
 
-<script src="svgEuropa.js"></script>
+<script src="svgContinent.js"></script>
 
 <script>
 
@@ -308,7 +308,7 @@ function clickCountry(e){
    //
    if(!clickDisabled){
         if(game.avalibleAnswer){
-            var currentClickId = e.path[0].id; 
+            var currentClickId = e.target.id; 
             var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
             //Si se dio click en el pais indicado
             if( currentCountryIdQuestion == currentClickId ){
@@ -333,7 +333,7 @@ function clickCountry(e){
 
 var game = {
     init: function(){
-        var countriesByClassName = document.getElementsByClassName("europe");
+        var countriesByClassName = document.getElementsByClassName("countries");
         
         if(document.cookie != ""){
             var langCookie = document.cookie;

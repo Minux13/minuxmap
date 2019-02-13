@@ -22,7 +22,7 @@
         overflow: auto;
         margin: auto;
         position: relative;
-        background: linear-gradient(220deg,#559, #99c,#aab,#559);
+        background: linear-gradient(220deg,#88c, #aab,#eef,#88c);/*linear-gradient(220deg,#559, #99c,#aab,#559);*/
         box-shadow: 0px 5px 20px #000;
         border-radius: 10px;
     }
@@ -53,18 +53,18 @@
     }
     body{
         padding: 0 !important;
-        background: linear-gradient(160deg,#0b0c22,#004400); /*linear-gradient(160deg,#0b0c22,#004400);*/
+        background: white;/*linear-gradient(160deg,#0b0c22,#004400); /*linear-gradient(160deg,#0b0c22,#004400);*/
         min-height: 100vh;
         margin: 0px;
     }
     
-    path, .europe{
+    path, .countries{
         fill: green; /*#a0b0e0;*/
         stroke: #c0d2f0; 
         stroke-width: 6; 
         fill-opacity: 1;
     }
-    path:hover, .europe:hover{
+    path:hover, .countries:hover{
         fill: #aaaadd;	
         stroke-width: 12; 
         stroke: rgb(255, 255, 255); 
@@ -166,7 +166,7 @@
         width: 20%;
         text-align: center;
         color: white;
-        background: #80573e;
+        background: linear-gradient(0deg,#8f684d,#764c34,#60401e);
         padding: 8px 0;
         border-right: solid 0.5px #5a4233;
         font-family: sans-serif;
@@ -214,8 +214,8 @@
     
     <div id="contenedor">
 	    <div id="listcountries" style="width: 100%; display:flex;box-sizing: border-box;">
-            <div id="tabamerica" class="selectcountry" >América</div>
-            <div id="tabeuropa" class="selectcountry" selected>Europa</div>
+            <div id="tabamerica" class="selectcountry" selected>América</div>
+            <div id="tabeuropa" class="selectcountry" >Europa</div>
             <div id="tabasia" class="selectcountry" >Asia</div>
             <div id="tabafrica" class="selectcountry" >Africa</div>
             <div id="taboceania" class="selectcountry" >Oceanía</div>
@@ -225,7 +225,7 @@
     <!--<button onclick="game.end();" style="background: transparent; border: none;">Show Score</button>
     <button id="aaa" style="background: transparent; border: none;">Aaaaa</button>-->
 
-<script src="svgEuropa.js"></script>
+<script src="svgContinent.js"></script>
 
 <script>
 
@@ -304,143 +304,66 @@ window.panZoom = svgPanZoom('#map', {
 panZoom.disableDblClickZoom();
 
 
-
-
-
-function stringToFloat(coordenates){
-    path=[];
-    for(let i=0; i<coordenates.length; i++){
-        let point = coordenates[i];
-        let coordenateObject = {p: point[0], x: [], y: []}
-        for(let j=1; j<point.length -1; j++){
-            coordenateObject.x.push(parseFloat(point[j][0]));
-            coordenateObject.y.push(parseFloat(point[j][1]));
-        }
-        path.push(coordenateObject);
-    }
-    return path;
-}
-
-function restaPosicion(arrayPoints){
-    
-    var coordenates = []
-    for(let i=0; i<arrayPoints.length; i++){    
-        let oneCoordenate = arrayPoints[i].split(" ");
-        let oneCoordenateArray = [];
-        for(let j=0; j<oneCoordenate.length; j++){
-            oneCoordenateArray.push( oneCoordenate[j].split(",") );
-        }
-        coordenates.push(oneCoordenateArray);
-    }
-    return stringToFloat(coordenates);
-}
-
-function getArrayPositions(d){
-    var points = [];
-    
-    var point = "";
-    for(let i=0; i<d.length; i++){
-        
-        if( d[i] == 'M' || d[i] == 'C' || d[i] == 'L' || d[i] == 'H' || d[i] == 'V' || d[i] == 'S' || d[i] == 'Q' || d[i] == 'T' || d[i] == 'A' || d[i] == 'Z'
-        || d[i] == 'm' || d[i] == 'c' || d[i] == 'l' || d[i] == 'h' || d[i] == 'v' || d[i] == 's' || d[i] == 'q' || d[i] == 't' || d[i] == 'a' || d[i] == 'z' ){
-            points.push(point)
-            point = "";            
-       }
-
-       point += d[i];
-
-    }
-    return restaPosicion(points)
-}
-
-
-
-
-
-allsrt = "";
-
-function unePaths(idC){
-    var c = document.getElementById(idC);
-    //console.log(c);
-    miny = 4310;
-    var paths = c.getElementsByTagName("path");
-    var str = '<path id="' + idC + '" d="';
-    //Cada path
-    for(var c=0; c< paths.length; c++){
-        let path = paths[c];
-        let d = path.getAttribute("d");
-        let arr = getArrayPositions(d);
-        let trazos = "";
-
-        //Cada iteracion es un M L C
-        for(var i=0; i<arr.length; i++){
-            let p = arr[i];
-            str1 = p.p[0] == "" ? '' : p.p[0] + ' ';
-            //Forma un str del trazo M C L
-            for(var j=0;j<p.x.length;j++){
-                if(p.y[j]<miny){miny=p.y[j]}
-                str1 += parseInt(p.x[j]) +','+ parseInt(p.y[j]) + ' ';
+function clickCountry(e){
+   //
+   if(!clickDisabled){
+        if(game.avalibleAnswer){
+            var currentClickId = e.path[0].id; 
+            var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
+            //Si se dio click en el pais indicado
+            if( currentCountryIdQuestion == currentClickId ){
+                console.log("True");
+                game.correct( currentClickId );
+            }else{
+                /*console.log("False");
+                redimensiona.zoom = true;
+                //Class mapeffect is slow effect only for automatic redimension
+                document.getElementById("map").setAttribute("class", "mapeffect");
+                panZoom.reset();
+                //redimensiona.start( currentCountryIdQuestion );
+                */
+                game.incorrect(currentCountryIdQuestion);
             }
-            trazos += str1;
         }
-        str += trazos + 'z ';
-    }
-    str += '" ></path>';
-    allsrt += str + '\n';
-    //console.log(str);
+   }else {
+       clickDisabled = false;
+   }
 }
 
-
-function redondeaPaths(idC){
-    var path = document.getElementById(idC);
-    console.log(path);
-    var str = '<path id="' + idC + '" d="';
-    var d = path.getAttribute("d");
-    var arr = getArrayPositions(d);
-    var trazos = "";
-
-    //Cada iteracion es un M L C (trazo)
-    for(var i=0; i<arr.length; i++){
-        //Este trazo
-        let p = arr[i];
-        trazo = p.p[0] == "" ? '' : p.p[0] + ' ';
-        //Forma el punto cooredenadas
-        for(var j=0;j<p.x.length;j++){
-            //if(p.y[j]<miny){miny=p.y[j]}
-            trazo += parseInt(p.x[j]) +','+ parseInt(p.y[j]) + ' ';
-        }
-        str += trazo;
-    }
-    
-    str += 'z " ></path>';
-
-    console.log(str);
-}
-
-function reduceTodos(){
-    c=document.getElementsByClassName("cambiar");
-    for(i=0;i<c.length;i++){
-    	unePaths(c[i].id)
-    }
-}
 
 var game = {
     init: function(){
-        var countriesByClassName = document.getElementsByTagName("path");
+        var countriesByClassName = document.getElementsByClassName("countries");
+        
+        if(document.cookie != ""){
+            var langCookie = document.cookie;
+            var lang = langCookie.split('=')
+            document.getElementById("selectlanguaje").value = lang[1];
+        }
+        this.setLanguajePage();
 
         //Add each path country click event 
         for(var c=0; c< countriesByClassName.length; c++){
-            countriesByClassName[c].addEventListener("click", function(e){
-                var elem = e.path[0] ;
-                elem.style.fill = "blue";
-                game.countriesId.push( e.path[0].id );
-                console.log(elem.id);
-            });        
+            countriesByClassName[c].addEventListener("click", clickCountry);        
         }
 
+        this.numOfCountries = countriesByClassName.length;
+        this.setRandomArrayCountriesCodes();
+        this.setQuestion();
     }
-    ,countriesId : []
+    ,countriesId : ['uz','am','ye','pk','id','cn','tw','jo','ae','tl','af','ru','bd','cy','sa','tr','jp','vn','kz','th','iq','ir','mm','sy','kg','mn','my','om','ps','ge','kw','az','ph','bt','tj','kr','lk','il','la','kp','tm','lb','np','bn','in','kh','qa']
     ,numOfCountries : 0
+    ,setRandomArrayCountriesCodes: function(){
+        var totalCountries = game.countriesId.length;
+        var newArrayContriesId = [];
+        for(let c = 0; c < totalCountries; c ++ ){
+            var newNumTotalCountries = game.countriesId.length;
+            var randomNum = Math.floor(Math.random() * newNumTotalCountries);
+            newArrayContriesId.push( game.countriesId[ randomNum ] );
+            game.countriesId.splice(randomNum, 1);
+        }
+        game.countriesId = newArrayContriesId;
+    }
     ,avalibleAnswer: true
     ,currentNumCountryQuestion : 0
     ,textsIdioms : []
@@ -477,8 +400,147 @@ var game = {
                      }
         
     }
+    ,setQuestion: function(){
+        if(game.currentNumCountryQuestion>= game.numOfCountries){
+            game.end();
+        }else{
+            var selectedLanguaje = document.getElementById("selectlanguaje").value;
+            var question = this.getQuestion[ selectedLanguaje ]();
+            
+            document.getElementById('question').innerHTML = question;
+        }
+    }
+    ,nextQuestion: function(){
+        game.currentNumCountryQuestion ++;
+        game.setQuestion();
+    }
+    ,numOfCorrects: 0
+    ,numOfIncorrects: 0
+    ,incorrect: function(idPais){
+        var mapSvg = document.getElementById("map");
+        clickDisabled = true;
+        game.avalibleAnswer = false;
+        //Se agrega y elimina esta clase para el svg que contiene una transicion para el zoom (transform : matrix...))
+        mapSvg.setAttribute("class", "mapeffect");
+        //panZoom.reset();
+        let PAISCENTERX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
+        let PAISCENTERY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
+        
+        panZoom.zoom( 3 );
+
+        game.numOfIncorrects++;
+        
+        let panX = -1 * PAISCENTERX * panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
+        let panY = -1 * PAISCENTERY * panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
+        panZoom.pan({x: panX ,y: panY});
+
+        var countryElement = document.getElementById( idPais );
+        
+        //Ajustar para que coincida con el tiempo del efecto CSS
+        setTimeout(function(){ 
+            countryElement.style.fill = "#cc2a2a";
+            countryElement.removeEventListener("click", clickCountry);
+            setTimeout(function(){
+                panZoom.reset();
+                setTimeout(function(){
+                    mapSvg.classList.remove("mapeffect");
+                    clickDisabled = false;
+                    game.avalibleAnswer = true;
+                    game.nextQuestion();
+                }, 1000);
+            },
+            600);
+        }
+        ,800);
+         
+
+    }
+    ,correct: function(idPais){
+        var countryElement = document.getElementById( idPais );
+        clickDisabled = false;
+        game.numOfCorrects++;
+        countryElement.style.fill = "#2a2acc";
+        countryElement.removeEventListener("click", clickCountry);
+        game.nextQuestion();
+    }
+    ,end: function(){
+        //var element = '<i class="fab fa-fort-awesome-alt" style="font-size:2em;"></i><br><br><i class="fas fa-check"></i><span style="margin: 0 0 0 15px;"> ' + game.numOfCorrects + '</span> <span style="margin: 0 20px;">|</span> <i class="fas fa-times"></i><span style="margin: 0 0 0 15px;">  ' + game.numOfIncorrects + '</span>';
+        var div = document.createElement('div');
+        div.setAttribute("class","scoreend");
+        div.innerHTML = '<i class="fab fa-fort-awesome-alt" style="font-size:3em;"></i><br><br>' +
+                      '<span style="font-size:2em;"><i class="fas fa-star-half-alt"></i>' +
+                      '<span style="margin-left:20px;">'+ ((game.numOfCorrects/game.numOfCountries).toFixed(2)*100) +'%</span></span>'+
+                      '<br><br><button id="gameagain" onclick="location.reload();">'+ game.textsIdioms[6] +'</button>';
+
+        document.getElementById('body').appendChild(div);
+    }
+    ,setTextsLanguaje : {
+        spanish: function(){ 
+                        var question = game.getQuestion[ 'spanish' ]();
+                        document.cookie = "languajemap=spanish";
+                        game.textsIdioms = [question, 'América','Europa','Asia','África','Oceanía','Jugar otra vez'];
+                   }
+        ,english : function(){ 
+                        var question = game.getQuestion[ 'english' ]();
+                        document.cookie = "languajemap=english";
+                        game.textsIdioms = [question,'America', 'Europe', 'Asia', 'Africa', 'Oceania','Play again']
+                   }
+        ,french : function(){ 
+                        var question = game.getQuestion[ 'french' ]();
+                        document.cookie = "languajemap=french";
+                        game.textsIdioms = [question,'Amérique', 'Europe', 'Asie', 'Afrique', 'Océanie','Rejouer'];
+                    }
+        ,japanese : function(){ 
+                        var question = game.getQuestion[ 'japanese' ]();
+                        document.cookie = "languajemap=japanese";
+                        game.textsIdioms = [question,'アメリカ','ヨーロッパ','アジア','アフリカ','オセアニア','もう一度遊ぶ'];
+                    }
+        ,deutsh : function(){
+                        var question = game.getQuestion[ 'deutsh' ]();
+                        document.cookie = "languajemap=deutsh";
+                        game.textsIdioms = [question,'Amerika', 'Europa', 'Asien', 'Afrika', 'Ozeanien','Spiel nochmal'];
+                     }
+    }
+    ,setLanguajePage: function(){
+        var selectedLanguaje = document.getElementById("selectlanguaje").value;
+        game.setTextsLanguaje[selectedLanguaje]();
+
+        document.getElementById('question').innerHTML =   game.textsIdioms[0];
+        document.getElementById('tabamerica').innerHTML = game.textsIdioms[1];
+        document.getElementById('tabeuropa').innerHTML =  game.textsIdioms[2];
+        document.getElementById('tabasia').innerHTML =    game.textsIdioms[3];
+        document.getElementById('tabafrica').innerHTML =  game.textsIdioms[4];
+        document.getElementById('taboceania').innerHTML = game.textsIdioms[5];
+    }
+    /*
+    ,timer : ""
+    ,setTimer: function(){
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function(){
+            document.getElementById("iscorrect").className = "hidealert";
+	        map.goHome();
+        }, 1500);   
+    }
+    ,correct: function(){
+        var checkElement = document.getElementById("iscorrect");
+        checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'>  &#x2713; Correcto </span>";
+    	checkElement.style.background = "#3630d4";
+        checkElement.className = "showalert";
+        this.setRandomCountryCode();
+        this.setTimer();
+    }
+    ,inCorrect: function(){
+        var checkElement = document.getElementById("iscorrect");
+        checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'> &#x2717 Incorrecto </span>";
+	    checkElement.style.background = "#d66";
+        checkElement.className = "showalert";
+        this.setRandomCountryCode();
+        this.setTimer();
+    }
+    */
 }
 game.init();
+//Se tiene que dar doble click cuando se arrastra o da zoom
 
 </script>
 

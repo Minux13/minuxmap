@@ -8,9 +8,6 @@
 
 	<link rel="stylesheet" href="countries.css" type="text/css">
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
-
-
     <script src="svg-pan-zoom.js"></script>
     <script src="hammer.js"></script>
     <script src="countries.js"></script>
@@ -61,12 +58,12 @@
     path, .europe{
         fill: green; /*#a0b0e0;*/
         stroke: #c0d2f0; 
-        stroke-width: 6; 
+        stroke-width: 1; 
         fill-opacity: 1;
     }
     path:hover, .europe:hover{
         fill: #aaaadd;	
-        stroke-width: 12; 
+stroke-width: 2; 
         stroke: rgb(255, 255, 255); 
     }
     #mx-tooltip {
@@ -198,19 +195,12 @@
             <span class="iconScore"><i class="far fa-times-circle"></i></span> 0
         </div>
         -->
-        <div id="languaje" style="color: blue;display: inline-block; float:right;" >
-            <select id="selectlanguaje" onchange="game.setLanguajePage();">
-                <option class="opcionlang" selected value="spanish">Español</option>
-                <option class="opcionlang" value="english">English</option>
-                <option class="opcionlang" value="french">Français</option>
-                <option class="opcionlang" value="deutsh">Deutsch</option>
-                <option class="opcionlang" value="japanese">日本人の</option>
-            </select>
-        </div>
+
 
     </div>
     <div id="question"></div>
     <div id="iscorrect" ></div>
+    <input type="text" id="nameclass">
     
     <div id="contenedor">
 	    <div id="listcountries" style="width: 100%; display:flex;box-sizing: border-box;">
@@ -225,7 +215,7 @@
     <!--<button onclick="game.end();" style="background: transparent; border: none;">Show Score</button>
     <button id="aaa" style="background: transparent; border: none;">Aaaaa</button>-->
 
-<script src="svgEuropa.js"></script>
+<script src="svgContinent.js"></script>
 
 <script>
 
@@ -321,6 +311,7 @@ function stringToFloat(coordenates){
     return path;
 }
 
+
 function restaPosicion(arrayPoints){
     
     var coordenates = []
@@ -359,6 +350,7 @@ function getArrayPositions(d){
 
 allsrt = "";
 
+//Para los elementos <g> con path internos los transforma en un solo elemento path con el id de g
 function unePaths(idC){
     var c = document.getElementById(idC);
     //console.log(c);
@@ -389,8 +381,8 @@ function unePaths(idC){
     allsrt += str + '\n';
     //console.log(str);
 }
-
-
+var todos = "";
+//Redondea los valores de todos a enteros
 function redondeaPaths(idC){
     var path = document.getElementById(idC);
     console.log(path);
@@ -414,15 +406,38 @@ function redondeaPaths(idC){
     
     str += 'z " ></path>';
 
-    console.log(str);
+    todos+=str + "\n";
 }
 
+//Redondea todos los puntos coordenadas de los trazos del path a enteros
 function reduceTodos(){
-    c=document.getElementsByClassName("cambiar");
+    c=document.getElementsByTagName("path");
     for(i=0;i<c.length;i++){
-    	unePaths(c[i].id)
+    	redondeaPaths(c[i].id)
     }
 }
+
+//Verifica que este el path id
+function siEsta(id){
+	esta=false;
+	for(var i=0;i<game.countriesId.length; i++){
+		if(id==game.countriesId[i]){
+			esta=true;
+		}
+	}
+    return esta;
+}
+//Elimina los path que no se hayan seleccionando
+function removeAllNotSelected(){
+    var allPaths = document.getElementsByTagName('path');
+    for(var i=0; i<allPaths.length; i++){
+    	var paisId = allPaths[i].id;
+    	if(!siEsta(paisId)){
+    		allPaths[i].remove();
+    	}
+    }
+}
+
 
 var game = {
     init: function(){
@@ -431,10 +446,11 @@ var game = {
         //Add each path country click event 
         for(var c=0; c< countriesByClassName.length; c++){
             countriesByClassName[c].addEventListener("click", function(e){
-                var elem = e.path[0] ;
-                elem.style.fill = "blue";
-                game.countriesId.push( e.path[0].id );
-                console.log(elem.id);
+                //var elem = e.path[0].remove(); //Elimina el seleccionado
+                var elem = e.path[0];
+                elem.style.fill = "white";
+                
+                elem.setAttribute("idc",document.getElementById("nameclass").value);
             });        
         }
 
