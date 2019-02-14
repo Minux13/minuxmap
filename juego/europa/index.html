@@ -1,0 +1,550 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>Adivina el país</title>
+
+	<link rel="stylesheet" href="../static/css/countries.css" type="text/css">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+
+
+    <style>
+    
+    #contenedor{
+        width: 80%;
+        overflow: auto;
+        margin: auto;
+        position: relative;
+        background: linear-gradient(220deg,#559, #99c,#aab,#559);
+        box-shadow: 0px 5px 20px #000;
+        border-radius: 10px;
+    }
+    #container{
+        width: 100%;
+        position: relative;
+        height: calc(100vh - 200px);
+    }
+
+    #map{
+        background: transparent;/*#a9b9f0; /*#dfe9fc;*/
+        height: 100%;
+        width: auto;
+        margin-right: auto;
+        margin-left: auto;
+        min-width: 100%;
+    }
+    ::-webkit-scrollbar { 
+        display: none; 
+    }
+    @media only screen and (max-width: 600px) {
+        #contenedor {
+            width: 95%;
+        }
+        #container{
+            height: calc(100vh - 270px);
+        }
+    }
+    body{
+        padding: 0 !important;
+        background: linear-gradient(160deg,#0b0c22,#004400); /*linear-gradient(160deg,#0b0c22,#004400);*/
+        min-height: 100vh;
+        margin: 0px;
+    }
+    
+    path, .countries{
+        fill: green; /*#a0b0e0;*/
+        stroke: #c0d2f0; 
+        stroke-width: 6; 
+        fill-opacity: 1;
+    }
+    path:hover, .countries:hover{
+        fill: #aaaadd;	
+        stroke-width: 12; 
+        stroke: rgb(255, 255, 255); 
+    }
+    #mx-tooltip {
+        /*display: none;*/
+        background: #C8C8f8;
+        padding: 10px;
+        position: absolute;
+        z-index: 1000;
+    }
+    
+    #outlines{
+        transition: transform-origin 1.5s, transform 1.5s;
+    }
+    
+    #score{
+        /*position: absolute;*/
+        right: 10px;
+        top: 0px;
+        color: #d0b32a;/*#e0cd71; a28c20*/
+        min-width: 60px;
+        background: white;
+        padding: 7px 15px;
+        display: inline;
+        
+    }
+    .iconScore{
+        color: #666;
+        /*font-size: 0.9em;*/
+        margin: 0 3px;
+    }
+    #question{
+        margin: 10px 0 15px 0;
+    }
+    #logominux{
+        top: 15px;
+        left: 15px;
+        background: rgba(100,100,100, 0.28);
+        border-radius: 50%;
+        border: 0;
+        display: inline-block;
+        padding: 12px;
+    }
+    #logominux i{
+        color: #eee;
+        text-shadow: 0px 0px 0px;
+        font-size: 2em;
+        transform: scale(0.89,1);
+        transition: color 1s;
+        animation: example;
+        animation-duration: 4s;
+        animation-iteration-count: infinite;
+    }
+@keyframes example {
+  0%    {text-shadow: 0px 0px 20px; }
+  25%   {text-shadow: 0px 0px 0px; }
+  44%   {transform: rotateY(0deg)  scale(0.89,1);}
+  50%   {transform: rotateY(90deg)  scale(0.89,1);}
+  56%   {transform: rotateY(0deg)  scale(0.89,1);}
+  80%   {text-shadow: 0px 0px 0px; }
+  100%  {text-shadow: 0px 0px 20px;}
+}
+    #logominux:hover{
+        background: rgba(100,100,100, 0.4);
+        box-shadow: 0 0 10px #aaa;
+        cursor: pointer;
+    }
+    .mapeffect g{
+        transition: 1s;        
+    }
+    #languaje select{
+        background: transparent;
+        color: blue ;
+        border: none;
+        margin: 10px;
+        font-size: 1.2em;
+    }
+    .opcionlang{
+        background: #071e17;
+        color: blue ;
+        border: none;
+    }
+    .scoreend{
+        padding: 20px;
+        text-align: center;
+        position: absolute;
+        top: 20%;
+        right: 0;
+        left: 0;
+        margin-right: auto;
+        margin-left: auto;
+        width: 200px;
+        border-radius: 10px;
+        background: #004400;
+        color: #fff;/*#aaaa00;*/
+    }
+    .selectcountry{
+        width: 20%;
+        text-align: center;
+        color: white;
+        background: linear-gradient(0deg,#8f684d,#764c34,#60401e);
+        padding: 8px 0;
+        border-right: solid 0.5px #5a4233;
+        font-family: sans-serif;
+        cursor: pointer;
+    }
+    .selectcountry:hover{
+        background: #a0775e;
+    }
+    .selectcountry[selected]{
+        background: transparent;
+        color: #60371e;
+        cursor: normal;
+    }
+    #gameagain{
+        border:none;background:white;color:#004400;padding:5px 15px;border-radius:10px;
+    }
+    </style>
+    
+</head>
+<body id="body">
+    <div style="position:relative; width: 100vw;display: block;">
+        
+        <a href="http://minux.pw"><div id="logominux"><i class="fas fa-home"></i></div></a>
+        <!--
+        <div id="score" >
+            <i class="fas fa-star-half-alt" style="margin: 0 5px 0 2px;"></i>
+            <span class="iconScore"><i class="far fa-check-circle"></i></span> 0 
+            <span style="color:gray;font-size:0.9em;vertical-align: text-top;margin: 0 4px;">|</span>
+            <span class="iconScore"><i class="far fa-times-circle"></i></span> 0
+        </div>
+        -->
+        <div id="languaje" style="color: blue;display: inline-block; float:right;" >
+            <select id="selectlanguaje" onchange="game.setLanguajePage();">
+                <option class="opcionlang" selected value="spanish">Español</option>
+                <option class="opcionlang" value="english">English</option>
+                <option class="opcionlang" value="french">Français</option>
+                <option class="opcionlang" value="deutsh">Deutsch</option>
+                <option class="opcionlang" value="japanese">日本人の</option>
+            </select>
+        </div>
+
+    </div>
+    <div id="question"></div>
+    <div id="iscorrect" ></div>
+    
+    <div id="contenedor">
+	    <div id="listcountries" style="width: 100%; display:flex;box-sizing: border-box;">
+            <div id="tabamerica" class="selectcountry" >América</div>
+            <div id="tabeuropa" class="selectcountry" selected>Europa</div>
+            <div id="tabasia" class="selectcountry" >Asia</div>
+            <div id="tabafrica" class="selectcountry" >Africa</div>
+            <div id="taboceania" class="selectcountry" >Oceanía</div>
+        </div>
+	    <div id="container" ></div>
+    </div>
+    <!--<button onclick="game.end();" style="background: transparent; border: none;">Show Score</button>
+    <button id="aaa" style="background: transparent; border: none;">Aaaaa</button>-->
+
+    
+    
+    <script src="../static/js/svg-pan-zoom.js"></script>
+    <script src="../static/js/hammer.js"></script>
+    <script src="../static/js/countries.js"></script>
+    <script src="../static/js/svgEuropa.js"></script>
+
+<script>
+
+var clickDisabled = false;
+
+// Don't use window.onLoad like this in production, because it can only listen to one function.
+//window.onload = function() {
+var eventsHandler;
+
+eventsHandler = {
+  haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel']
+, init: function(options) {
+    var instance = options.instance
+      , initialScale = 1
+      , pannedX = 0
+      , pannedY = 0
+
+    // Init Hammer
+    // Listen only for pointer and touch events
+    this.hammer = Hammer(options.svgElement, {
+      inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+    })
+
+    // Enable pinch
+    this.hammer.get('pinch').set({enable: true})
+
+    // Handle double tap
+    this.hammer.on('doubletap', function(ev){
+      instance.zoomIn()
+    })
+
+    // Handle pan
+    this.hammer.on('panstart panmove', function(ev){
+      // On pan start reset panned variables
+      if (ev.type === 'panstart') {
+        pannedX = 0
+        pannedY = 0
+      }
+
+      // Pan only the difference
+      instance.panBy({x: ev.deltaX - pannedX, y: ev.deltaY - pannedY})
+      pannedX = ev.deltaX
+      pannedY = ev.deltaY
+    })
+
+    // Handle pinch
+    this.hammer.on('pinchstart pinchmove', function(ev){
+      // On pinch start remember initial zoom
+      if (ev.type === 'pinchstart') {
+        initialScale = instance.getZoom()
+        instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+      }
+
+      instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y})
+    })
+
+    // Prevent moving the page on some devices when panning over SVG
+    options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); });
+  }
+
+, destroy: function(){
+    this.hammer.destroy()
+  }
+}
+
+// Expose to window namespace for testing purposes
+window.panZoom = svgPanZoom('#map', {
+  zoomEnabled: true
+, controlIconsEnabled: false
+, fit: 1
+, center: 1
+, customEventsHandler: eventsHandler
+, beforePan : function(a,b){clickDisabled = true;}
+});
+
+panZoom.disableDblClickZoom();
+
+
+function clickCountry(e){
+   //
+   if(!clickDisabled){
+        if(game.avalibleAnswer){
+            var currentClickId = e.target.id; 
+            var currentCountryIdQuestion = game.countriesId[ game.currentNumCountryQuestion ];
+            //Si se dio click en el pais indicado
+            if( currentCountryIdQuestion == currentClickId ){
+                console.log("True");
+                game.correct( currentClickId );
+            }else{
+                /*console.log("False");
+                redimensiona.zoom = true;
+                //Class mapeffect is slow effect only for automatic redimension
+                document.getElementById("map").setAttribute("class", "mapeffect");
+                panZoom.reset();
+                //redimensiona.start( currentCountryIdQuestion );
+                */
+                game.incorrect(currentCountryIdQuestion);
+            }
+        }
+   }else {
+       clickDisabled = false;
+   }
+}
+
+
+var game = {
+    init: function(){
+        var countriesByClassName = document.getElementsByClassName("countries");
+        
+        if(document.cookie != ""){
+            var langCookie = document.cookie;
+            var lang = langCookie.split('=')
+            document.getElementById("selectlanguaje").value = lang[1];
+        }
+        this.setLanguajePage();
+
+        //Add each path country click event 
+        for(var c=0; c< countriesByClassName.length; c++){
+            countriesByClassName[c].addEventListener("click", clickCountry);        
+        }
+
+        this.numOfCountries = countriesByClassName.length;
+        this.setRandomArrayCountriesCodes();
+        this.setQuestion();
+    }
+    ,countriesId : ["is","pt","es","ch","at","cz","sk","be","it","by","pl","fi","de","se","no","ua","ie","gb","cy","tr","hu","lt","lv","md","bg","al","ee","fr","nl","ba","si","mk","hr","dk","me","rs","xk","gr","im","ro","ru","ad","mc","lu","li","sm","va","mt"]
+    ,numOfCountries : 0
+    ,setRandomArrayCountriesCodes: function(){
+        var totalCountries = game.countriesId.length;
+        var newArrayContriesId = [];
+        for(let c = 0; c < totalCountries; c ++ ){
+            var newNumTotalCountries = game.countriesId.length;
+            var randomNum = Math.floor(Math.random() * newNumTotalCountries);
+            newArrayContriesId.push( game.countriesId[ randomNum ] );
+            game.countriesId.splice(randomNum, 1);
+        }
+        game.countriesId = newArrayContriesId;
+    }
+    ,avalibleAnswer: true
+    ,currentNumCountryQuestion : 0
+    ,textsIdioms : []
+    ,getQuestion: {
+        spanish: function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
+                        var countryTranslate = countryElement.translations.spa ? countryElement.translations.spa.common : countryElement.name.common;
+                        return '¿Dónde se encuentra ' + countryTranslate + '?';
+                   }
+        ,english : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
+                        var countryTranslate = countryElement.name.common ? countryElement.name.common : countryElement.name.common;
+                        return 'Where is ' + countryTranslate + '?';
+                   }
+        ,french : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
+                        var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
+                        var contraction = "le ";
+                        var fl = countryTranslate[0];   //first letter
+                        if( fl == 'A' || fl == 'E' || fl == 'I' || fl == 'O' || fl == 'U'){ 
+                            contraction = "l'";
+                        }
+                        return 'Où est ' + contraction + countryTranslate + '?';
+                    }
+        ,japanese : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
+                        var countryTranslate = countryElement.translations.jpn ? countryElement.translations.jpn.common : countryElement.name.common;
+                        return countryTranslate + 'はどこですか';
+                    }
+        ,deutsh : function(){ 
+                        var countryElement = minux_countries_codes[ game.countriesId[game.currentNumCountryQuestion] ];
+                        var countryTranslate = countryElement.translations.fra ? countryElement.translations.fra.common : countryElement.name.common;
+                        return 'Wo ist ' + countryTranslate + '?';
+                     }
+        
+    }
+    ,setQuestion: function(){
+        if(game.currentNumCountryQuestion>= game.numOfCountries){
+            game.end();
+        }else{
+            var selectedLanguaje = document.getElementById("selectlanguaje").value;
+            var question = this.getQuestion[ selectedLanguaje ]();
+            
+            document.getElementById('question').innerHTML = question;
+        }
+    }
+    ,nextQuestion: function(){
+        game.currentNumCountryQuestion ++;
+        game.setQuestion();
+    }
+    ,numOfCorrects: 0
+    ,numOfIncorrects: 0
+    ,incorrect: function(idPais){
+        var mapSvg = document.getElementById("map");
+        clickDisabled = true;
+        game.avalibleAnswer = false;
+        //Se agrega y elimina esta clase para el svg que contiene una transicion para el zoom (transform : matrix...))
+        mapSvg.setAttribute("class", "mapeffect");
+        //panZoom.reset();
+        let PAISCENTERX = parseFloat(document.getElementById(idPais).getAttribute("centerx"));
+        let PAISCENTERY = parseFloat(document.getElementById(idPais).getAttribute("centery"));
+        
+        panZoom.zoom( 3 );
+
+        game.numOfIncorrects++;
+        
+        let panX = -1 * PAISCENTERX * panZoom.getSizes().realZoom + (panZoom.getSizes().width/2);
+        let panY = -1 * PAISCENTERY * panZoom.getSizes().realZoom + (panZoom.getSizes().height/2);
+        panZoom.pan({x: panX ,y: panY});
+
+        var countryElement = document.getElementById( idPais );
+        
+        //Ajustar para que coincida con el tiempo del efecto CSS
+        setTimeout(function(){ 
+            countryElement.style.fill = "#cc2a2a";
+            countryElement.removeEventListener("click", clickCountry);
+            setTimeout(function(){
+                panZoom.reset();
+                setTimeout(function(){
+                    mapSvg.classList.remove("mapeffect");
+                    clickDisabled = false;
+                    game.avalibleAnswer = true;
+                    game.nextQuestion();
+                }, 1000);
+            },
+            600);
+        }
+        ,800);
+         
+
+    }
+    ,correct: function(idPais){
+        var countryElement = document.getElementById( idPais );
+        clickDisabled = false;
+        game.numOfCorrects++;
+        countryElement.style.fill = "#2a2acc";
+        countryElement.removeEventListener("click", clickCountry);
+        game.nextQuestion();
+    }
+    ,end: function(){
+        //var element = '<i class="fab fa-fort-awesome-alt" style="font-size:2em;"></i><br><br><i class="fas fa-check"></i><span style="margin: 0 0 0 15px;"> ' + game.numOfCorrects + '</span> <span style="margin: 0 20px;">|</span> <i class="fas fa-times"></i><span style="margin: 0 0 0 15px;">  ' + game.numOfIncorrects + '</span>';
+        var div = document.createElement('div');
+        div.setAttribute("class","scoreend");
+        div.innerHTML = '<i class="fab fa-fort-awesome-alt" style="font-size:3em;"></i><br><br>' +
+                      '<span style="font-size:2em;"><i class="fas fa-star-half-alt"></i>' +
+                      '<span style="margin-left:20px;">'+ ((game.numOfCorrects/game.numOfCountries).toFixed(2)*100) +'%</span></span>'+
+                      '<br><br><button id="gameagain" onclick="location.reload();">'+ game.textsIdioms[6] +'</button>';
+
+        document.getElementById('body').appendChild(div);
+    }
+    ,setTextsLanguaje : {
+        spanish: function(){ 
+                        var question = game.getQuestion[ 'spanish' ]();
+                        document.cookie = "languajemap=spanish";
+                        game.textsIdioms = [question, 'América','Europa','Asia','África','Oceanía','Jugar otra vez'];
+                   }
+        ,english : function(){ 
+                        var question = game.getQuestion[ 'english' ]();
+                        document.cookie = "languajemap=english";
+                        game.textsIdioms = [question,'America', 'Europe', 'Asia', 'Africa', 'Oceania','Play again']
+                   }
+        ,french : function(){ 
+                        var question = game.getQuestion[ 'french' ]();
+                        document.cookie = "languajemap=french";
+                        game.textsIdioms = [question,'Amérique', 'Europe', 'Asie', 'Afrique', 'Océanie','Rejouer'];
+                    }
+        ,japanese : function(){ 
+                        var question = game.getQuestion[ 'japanese' ]();
+                        document.cookie = "languajemap=japanese";
+                        game.textsIdioms = [question,'アメリカ','ヨーロッパ','アジア','アフリカ','オセアニア','もう一度遊ぶ'];
+                    }
+        ,deutsh : function(){
+                        var question = game.getQuestion[ 'deutsh' ]();
+                        document.cookie = "languajemap=deutsh";
+                        game.textsIdioms = [question,'Amerika', 'Europa', 'Asien', 'Afrika', 'Ozeanien','Spiel nochmal'];
+                     }
+    }
+    ,setLanguajePage: function(){
+        var selectedLanguaje = document.getElementById("selectlanguaje").value;
+        game.setTextsLanguaje[selectedLanguaje]();
+
+        document.getElementById('question').innerHTML =   game.textsIdioms[0];
+        document.getElementById('tabamerica').innerHTML = game.textsIdioms[1];
+        document.getElementById('tabeuropa').innerHTML =  game.textsIdioms[2];
+        document.getElementById('tabasia').innerHTML =    game.textsIdioms[3];
+        document.getElementById('tabafrica').innerHTML =  game.textsIdioms[4];
+        document.getElementById('taboceania').innerHTML = game.textsIdioms[5];
+    }
+    /*
+    ,timer : ""
+    ,setTimer: function(){
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function(){
+            document.getElementById("iscorrect").className = "hidealert";
+	        map.goHome();
+        }, 1500);   
+    }
+    ,correct: function(){
+        var checkElement = document.getElementById("iscorrect");
+        checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'>  &#x2713; Correcto </span>";
+    	checkElement.style.background = "#3630d4";
+        checkElement.className = "showalert";
+        this.setRandomCountryCode();
+        this.setTimer();
+    }
+    ,inCorrect: function(){
+        var checkElement = document.getElementById("iscorrect");
+        checkElement.innerHTML = "<span style='margin: auto;vertical-align: -30px;color: #fff; font-size: 28px;'> &#x2717 Incorrecto </span>";
+	    checkElement.style.background = "#d66";
+        checkElement.className = "showalert";
+        this.setRandomCountryCode();
+        this.setTimer();
+    }
+    */
+}
+game.init();
+//Se tiene que dar doble click cuando se arrastra o da zoom
+
+</script>
+
+</body>
+</html>
